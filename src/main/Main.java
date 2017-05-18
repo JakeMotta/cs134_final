@@ -6,6 +6,7 @@ import com.jogamp.opengl.*;
 import Camera.Camera;
 import Camera.Window;
 import background.Background;
+import background.blockGrid;
 import sprites.*;
 
 import com.jogamp.newt.event.KeyEvent;
@@ -31,7 +32,7 @@ public class Main {
     public static Camera camera;
     public static Hero hero;
     public static Background background;
-    private static int grass_top_left_corner;
+    public static blockGrid myGrid;
     
     public static int worldWidth;
     public static int worldHeight;
@@ -42,25 +43,25 @@ public class Main {
     	
     	window = new Window();
     	GL2 gl = window.getGL();
-    	
-    	grass_top_left_corner = Main.glTexImageTGAFile(gl, "Sprites/Map/0.tga", spriteSize);
-    	
+    	    	
     	// The game loop
         long lastFrameNS;
         long curFrameNS = System.nanoTime();
-
+        
         camera = new Camera(window.getWidth(),window.getHeight());
         
-        hero = new Hero(950, 2050, spriteSize, gl);
-        ArrayList<Fire> fireArray = new ArrayList<Fire>();
+        //hero = new Hero(950, 2050, spriteSize, gl);
+        ArrayList<Block> blockArray = new ArrayList<Block>();
         
         background = new Background(spriteSize, gl);
         worldWidth = background.getWorldWidth();
         worldHeight = background.getWorldHeight();
+        myGrid = new blockGrid();
          
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
         int lastPhysicsFrameMs = 0;
+        int nextBlock = 0;
         
         while (!shouldExit) {
         	
@@ -70,7 +71,7 @@ public class Main {
             long deltaTimeMS = (curFrameNS - lastFrameNS) / 1000000;
             
             long bgSpeed = (1 * deltaTimeMS)/4;
-            hero.setSpeed(bgSpeed);
+            //hero.setSpeed(bgSpeed);
 
             // Actually, this runs the entire OS message pump.
             window.myWindow.display();
@@ -85,79 +86,78 @@ public class Main {
             }
 
             if (window.kbState[KeyEvent.VK_UP]) {   
-	        		hero.keyDown("up");      		
-	        } else {
-	        	hero.jumpCounter = 0;
 	        }
 	
 	        if (window.kbState[KeyEvent.VK_DOWN]) {
-	        		hero.keyDown("down");
 	        }
 	
 	        if (window.kbState[KeyEvent.VK_LEFT]) {
-	        		hero.keyDown("left");      		
 	        }
 	        
 	        if (window.kbState[KeyEvent.VK_RIGHT]) {
-	        		hero.keyDown("right");
-	        }
-	        
-	        if (window.kbState[KeyEvent.VK_Z]) {
-        		hero.keyDown("z");
-        		  				
-        		if(hero.punchCounter == 6 || hero.punchCounter == 24) {
-        			Fire fire;
-        			
-        			if(hero.getDirection() == "left") {
-    			   		fire = new Fire(hero.getX()-20, hero.getY()+15, spriteSize, gl);
-    			   		fire.setDirection("left");
-        			}
-        			else {
-        				fire = new Fire(hero.getX()+60, hero.getY()+15, spriteSize, gl);
-        				fire.setDirection("right");
-        			}
-        			
-        			fireArray.add(fire);
-        		}
 	        }
 	         
             window.gl.glClearColor(0, 0, 0, 1);
             window.gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
             
-            camera.update(hero);
+            //camera.update(hero);
             background.update(gl);
             
             
+            if(nextBlock == 100) {
+            	
+            	// Get random X position for block
+            	int randomX = getRandom(10) * 64;
+            	
+            	Block block;
+            	block = new Block(randomX, -128, spriteSize, gl);
+            	blockArray.add(block);
+            	
+            	for(int i = 0; i < 10; i++)
+                	System.out.println(myGrid.getGrid(i));
+            	
+            	System.out.println("----------------------");
+            	
+            	// Update grid with column block is in
+            	myGrid.add(randomX/64);
+            	
+            	for(int i = 0; i < 10; i++)
+                	System.out.println(myGrid.getGrid(i));
+            }
+            
+            for(int bA = 0; bA < blockArray.size(); bA++) {
+            	
+        	    if(blockArray.get(bA).isAlive())
+        	    	blockArray.get(bA).update(gl);
+        	    else {
+        		    System.out.println("Remove me daddy");
+        		    blockArray.remove(bA);
+        	    }
+        	    
+            }
+            
+            
              
+            /**
             // Physics update
             do {
  	           // 1. Physics movement
  	           // 2. Physics collision detection
  	           // 3. Physics collision resolution
-            	
-            	// Draw any fire sprites created in-game
-            	for(int fA = 0; fA < fireArray.size(); fA++) {
-            		if(AABB_Collision(fireArray.get(fA), block)) {
-            			fireArray.get(fA).collision = true;
-            			block.setHP(fireArray.get(fA).damage);
-            		}
-                
-            	    if(fireArray.get(fA).isAlive)
-            		    fireArray.get(fA).update(gl);
-            	    else {
-            		    System.out.println("Remove me daddy");
-            		    fireArray.remove(fA);
-            	    }
-            	    
-                }   
-         	              
-                hero.update(gl);
+      
+         	   //hero.update(gl);
 
                 lastPhysicsFrameMs += physicsDeltaMs;
             } while (lastPhysicsFrameMs + physicsDeltaMs < deltaTimeMS );
+            **/
 
-            //System.out.println("cur: " + window.kbState + ", last: " + window.kbPrevState);
-        }
+            nextBlock++;
+        }  
+    }
+    
+    public static int getRandom(int max) {
+    	int randomNum = (int)(Math.random() * max);
+		return randomNum;
     }
         
     public static boolean[] getKBState() {

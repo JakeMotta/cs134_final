@@ -59,7 +59,7 @@ public class Hero extends Sprite implements Actor {
 	    shape = "rect";
 	    isGrounded = false;
 	    
-		currentImage = idleRight[0];
+		//currentImage = idleRight[0];
 	}
 	
 	// Set hero's speed
