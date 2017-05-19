@@ -9,6 +9,7 @@ public class Background {
 	// background sprite
 	
 	private int bg1;
+	private int alert;
 	
     private int x;
     private int y;
@@ -29,6 +30,8 @@ public class Background {
 	public Background(int[] size, GL2 gl) {
 
 		bg1 = Main.glTexImageTGAFile(gl, "Sprites/Background/bg1.tga", size);
+		alert = Main.glTexImageTGAFile(gl, "Sprites/Background/ohno.tga", size);
+		
 		width = height = 64;
 		
 		x = Main.camera.getX();
@@ -67,6 +70,14 @@ public class Background {
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
 	
+	public void addAlert(int column) {
+		myBackground[1][column] = 1;
+	}
+	
+	public void removeAlert(int column) {
+		myBackground[1][column] = 0;
+	}
+	
 	public void update(GL2 gl) {
 		
 		startXTile = (int) Math.abs(Math.floor((Main.camera.getX())/width));
@@ -78,6 +89,9 @@ public class Background {
     			switch(myBackground[i][j]) {
         			case 0:
         				image = bg1;
+        				break;
+        			case 1:
+        				image = alert;
         				break;
         			default:
         				System.out.println("tile " + myBackground[i][j] + " not printed");

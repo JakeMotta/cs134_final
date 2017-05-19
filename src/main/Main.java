@@ -6,6 +6,7 @@ import com.jogamp.opengl.*;
 import Camera.Camera;
 import Camera.Window;
 import background.Background;
+import background.Lava;
 import background.blockGrid;
 import sprites.*;
 
@@ -33,9 +34,11 @@ public class Main {
     public static Hero hero;
     public static Background background;
     public static blockGrid myGrid;
+    public static Lava lava;
     
     public static int worldWidth;
     public static int worldHeight;
+    public static int gameTimer = 0;
                
     public static void main(String[] args) {
           
@@ -50,18 +53,29 @@ public class Main {
         
         camera = new Camera(window.getWidth(),window.getHeight());
         
-        //hero = new Hero(950, 2050, spriteSize, gl);
+        hero = new Hero(100, 100, spriteSize, gl);
         ArrayList<Block> blockArray = new ArrayList<Block>();
         
         background = new Background(spriteSize, gl);
         worldWidth = background.getWorldWidth();
         worldHeight = background.getWorldHeight();
         myGrid = new blockGrid();
+        lava = new Lava(spriteSize, gl, 832);
          
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
         int lastPhysicsFrameMs = 0;
-        int nextBlock = 0;
+        int nextBlock = 0, randomBlockX = 0, temp = 0;
+        int lavaTimer = 0;
+        
+        // Starting blocks
+        for(int i = 1; i <= 3; i++) {
+        	for(int j = 0; j < 10; j++) {
+		        Block block;
+		    	block = new Block(j*64, worldHeight-(64*i), spriteSize, gl);
+		    	blockArray.add(block);    	
+        	}
+        }
         
         while (!shouldExit) {
         	
@@ -71,7 +85,7 @@ public class Main {
             long deltaTimeMS = (curFrameNS - lastFrameNS) / 1000000;
             
             long bgSpeed = (1 * deltaTimeMS)/4;
-            //hero.setSpeed(bgSpeed);
+            hero.setSpeed(bgSpeed);
 
             // Actually, this runs the entire OS message pump.
             window.myWindow.display();
@@ -86,43 +100,57 @@ public class Main {
             }
 
             if (window.kbState[KeyEvent.VK_UP]) {   
+            	hero.keyDown("up");
 	        }
 	
 	        if (window.kbState[KeyEvent.VK_DOWN]) {
+	        	hero.keyDown("down");
 	        }
 	
 	        if (window.kbState[KeyEvent.VK_LEFT]) {
+	        	hero.keyDown("left");
 	        }
 	        
 	        if (window.kbState[KeyEvent.VK_RIGHT]) {
+	        	hero.keyDown("right");
 	        }
 	         
             window.gl.glClearColor(0, 0, 0, 1);
             window.gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
             
-            //camera.update(hero);
+            camera.update(hero);
             background.update(gl);
             
             
-            if(nextBlock == 100) {
+            
+            // Add new block 
+            if(nextBlock % 100 == 0) {
+            	
+            	int[] blockHistory = myGrid.getHistory();
             	
             	// Get random X position for block
-            	int randomX = getRandom(10) * 64;
+            	randomBlockX = getRandom(10) * 64;
             	
-            	Block block;
-            	block = new Block(randomX, -128, spriteSize, gl);
-            	blockArray.add(block);
+            	// If two blocks in a row
+            	if(blockHistory[0] == blockHistory[1])
+	            	while(randomBlockX == blockHistory[0])
+	            		randomBlockX = getRandom(10) * 64;
             	
-            	for(int i = 0; i < 10; i++)
-                	System.out.println(myGrid.getGrid(i));
-            	
-            	System.out.println("----------------------");
-            	
-            	// Update grid with column block is in
-            	myGrid.add(randomX/64);
-            	
-            	for(int i = 0; i < 10; i++)
-                	System.out.println(myGrid.getGrid(i));
+            	// Add background alert
+            	background.addAlert(randomBlockX/64);
+
+	            Block block;
+	            block = new Block(randomBlockX, -128, spriteSize, gl);
+	            blockArray.add(block);    	
+	            
+	            temp = nextBlock + 25;
+	            // Update grid with column block is in
+	            myGrid.add(randomBlockX/64);      
+            }
+            
+            if(nextBlock >= temp) {
+            	// Remove background alert
+	            background.removeAlert(randomBlockX/64);
             }
             
             for(int bA = 0; bA < blockArray.size(); bA++) {
@@ -130,13 +158,14 @@ public class Main {
         	    if(blockArray.get(bA).isAlive())
         	    	blockArray.get(bA).update(gl);
         	    else {
-        		    System.out.println("Remove me daddy");
+        		    //System.out.println("Remove me daddy");
         		    blockArray.remove(bA);
         	    }
         	    
             }
             
-            
+            hero.update(gl);
+            lava.update(gl, lavaTimer);
              
             /**
             // Physics update
@@ -152,7 +181,19 @@ public class Main {
             **/
 
             nextBlock++;
+            gameTimer = nextBlock;
+            
+            // Animation speed for the lava
+            if(nextBlock % 5 == 0)
+	            if(lavaTimer < 12)
+	            	lavaTimer++;
+	            else
+	            	lavaTimer = 0;      
         }  
+    }
+    
+    public static int getGameTimer() {
+    	return gameTimer;
     }
     
     public static int getRandom(int max) {

@@ -10,6 +10,7 @@ public class Hero extends Sprite implements Actor {
 	public static int currentImage;
 	
 	//public static int idleLeft[] = new int[8];
+	public static int myImg;
     
     // Character Specifics
     private int fps = 6;
@@ -50,7 +51,7 @@ public class Hero extends Sprite implements Actor {
 		idleLeft[6] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle7.tga", spriteSize);
 		idleLeft[7] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle8.tga", spriteSize);
 		**/
-		
+		myImg = Main.glTexImageTGAFile(gl, "Sprites/Lava/lava.tga", spriteSize);
 	    vsp = hsp = speed = 3;
 		direction = "right";
 	    width = spriteSize[0];
@@ -70,6 +71,7 @@ public class Hero extends Sprite implements Actor {
 	@Override
 	public void update(GL2 gl) {
 
+		/**
 		checkCollision();
 		
 		if(isGrounded == false) {
@@ -109,11 +111,12 @@ public class Hero extends Sprite implements Actor {
 		}
 	        
 	    setImage(currentImage);
-	    
+	    **/
 	    // Reset booleans
 	    shouldMove = false;
 	    attacking = false;
 	    keyDown = null;
+	    
 	    
 	    draw(gl);
 	}
@@ -200,14 +203,6 @@ public class Hero extends Sprite implements Actor {
 		else
 			shouldMove = false;
 	
-		// Attack keys
-		if(keyDown == "z") {
-			attacking = true;
-			shouldMove = false;
-		}
-		else
-			attacking = false;
-		
 		// If movement keys are pressed		
 			if(keyDown == "up" && canJump == true) {
 				jumpCounter++;
@@ -217,14 +212,21 @@ public class Hero extends Sprite implements Actor {
 						setY(getY()-64-bottomOffset);				
 			} 
 
-			if(keyDown == "left" && canMoveLeft == true)
+			if(keyDown == "left")
 				if (getX() > 0)
 	    			moveX(-hsp);
 			
-			
-			if(keyDown == "right" && canMoveRight == true) 
+			if(keyDown == "right") 
 				if(getX() < Main.worldWidth-getWidth())
-					moveX(hsp);			
+					moveX(hsp);	
+			
+			if(keyDown == "up") 
+				if(getY() > 0)
+					moveY(-vsp);	
+			
+			if(keyDown == "down") 
+				if(getY() < Main.worldHeight-getHeight())
+					moveY(vsp);	
 	}
 		
 	public String getShape() {
