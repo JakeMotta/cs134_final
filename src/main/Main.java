@@ -39,6 +39,8 @@ public class Main {
     public static int worldWidth;
     public static int worldHeight;
     public static int gameTimer = 0;
+    public static int gameSpeed = 100;
+    public static int blockVSP = 4;
                
     public static void main(String[] args) {
           
@@ -65,14 +67,14 @@ public class Main {
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
         int lastPhysicsFrameMs = 0;
-        int nextBlock = 0, randomBlockX = 0, temp = 0;
+        int nextBlock = 0, randomBlockX = 0, temp = 0, pow = 0;
         int lavaTimer = 0;
         
         // Starting blocks
         for(int i = 1; i <= 3; i++) {
         	for(int j = 0; j < 10; j++) {
 		        Block block;
-		    	block = new Block(j*64, worldHeight-(64*i), spriteSize, gl);
+		    	block = new Block(j*64, worldHeight-(64*i+blockVSP), spriteSize, gl);
 		    	blockArray.add(block);    	
         	}
         }
@@ -120,30 +122,30 @@ public class Main {
             
             camera.update(hero);
             background.update(gl);
-            
-            
-            
+                
             // Add new block 
             if(nextBlock % 100 == 0) {
             	
             	int[] blockHistory = myGrid.getHistory();
-            	
+
             	// Get random X position for block
             	randomBlockX = getRandom(10) * 64;
             	
             	// If two blocks in a row
-            	if(blockHistory[0] == blockHistory[1])
+            	if(blockHistory[0] == randomBlockX)
 	            	while(randomBlockX == blockHistory[0])
 	            		randomBlockX = getRandom(10) * 64;
+            	
             	
             	// Add background alert
             	background.addAlert(randomBlockX/64);
 
-	            Block block;
-	            block = new Block(randomBlockX, -128, spriteSize, gl);
+            	Block block;
+            	block = new Block(randomBlockX, -128, spriteSize, gl); 
 	            blockArray.add(block);    	
 	            
 	            temp = nextBlock + 25;
+	            
 	            // Update grid with column block is in
 	            myGrid.add(randomBlockX/64);      
             }
@@ -189,11 +191,27 @@ public class Main {
 	            	lavaTimer++;
 	            else
 	            	lavaTimer = 0;      
+         
+            if(gameTimer % 1000 == 0) {
+            	pow += 1;
+            	//blockVSP = (int) Math.pow(2, pow);
+            }
+            
+            //System.out.println("diff:     " + Main.getGameTimer() / Main.getGameSpeed());
+            //System.out.println("falldiff: " + blockVSP * (Main.getGameTimer() / Main.getGameSpeed()));
         }  
+    }
+    
+    public static int getBlockVSP() {
+    	return blockVSP;
     }
     
     public static int getGameTimer() {
     	return gameTimer;
+    }
+    
+    public static int getGameSpeed() {
+    	return gameSpeed;
     }
     
     public static int getRandom(int max) {

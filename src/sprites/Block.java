@@ -11,9 +11,8 @@ public class Block extends Sprite {
 	
 	private int hp = 100;
 	private int stack = 0;
-	private int initTimer = 0;
-	private double fallDiff = 0;
-	private int fallSpeed = 50;
+	private int fallDiff = 0;
+	private int vsp = Main.getBlockVSP();
 
 	public Block(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
@@ -21,7 +20,6 @@ public class Block extends Sprite {
 		width = height = 64;
 		blockImg = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block1.tga", spriteSize);
 		stack = Main.myGrid.getGrid(getX()/64);
-		initTimer = Main.getGameTimer();
 		
 		setImage(blockImg);
 	}
@@ -31,37 +29,44 @@ public class Block extends Sprite {
 		if(hp <= 0)
 			isAlive = false;
 		
-		checkBelow();
-		
 		if(shouldFall)
 			fall();
 		
 		if(!shouldFall)
+			System.out.println(getY());
+		
+		if(!shouldFall)
 			sink();
-			
+		
+		checkBelow();
+		checkVSP();
+		
 		setImage(blockImg);
 		draw(gl);
 	}
 	
+	public void checkVSP() {
+		vsp = Main.getBlockVSP();
+	}
+	
 	public void sink() {
-		if(Main.gameTimer % fallSpeed == 0)
-			moveY(1);
+		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 
+			moveY(vsp);	
 	}
 	
 	public void fall() {
-		moveY(3);
+		moveY(vsp);
 	}
 	
 	public void checkBelow() {
 		// If block is at the bottom of the screen
 		if(getY() >= 896)
 			shouldFall = false;
-		
-		fallDiff = Math.floor(Main.getGameTimer() / fallSpeed);
-		
-		// If a block is at the top of another block in its column
+				
+		fallDiff = vsp * (Main.getGameTimer() / Main.getGameSpeed());
+
 		if(getY() >= Main.worldHeight - (stack * 64) - 64 + fallDiff)
-			shouldFall = false;		
+			shouldFall = false;	
 	}
 	
 	public void setHP(int dmg) {

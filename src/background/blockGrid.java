@@ -17,8 +17,7 @@ public class blockGrid {
 		grid[column] += 1;
 
 		//if(history[0] != )
-			history[1] = history[0];
-		
+		history[1] = history[0];
 		history[0] = column;
 		
 	}
