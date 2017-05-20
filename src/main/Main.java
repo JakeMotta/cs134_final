@@ -9,6 +9,7 @@ import background.Background;
 import background.Lava;
 import background.blockGrid;
 import sprites.*;
+import font.Font;
 
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
@@ -35,6 +36,7 @@ public class Main {
     public static Background background;
     public static blockGrid myGrid;
     public static Lava lava;
+    public static Font font;
     
     public static int worldWidth;
     public static int worldHeight;
@@ -63,12 +65,15 @@ public class Main {
         worldHeight = background.getWorldHeight();
         myGrid = new blockGrid();
         lava = new Lava(spriteSize, gl, 832);
+        font = new Font(spriteSize, gl);
          
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
         int lastPhysicsFrameMs = 0;
         int nextBlock = 0, randomBlockX = 0, temp = 0, pow = 0;
         int lavaTimer = 0;
+        //textSize[0] = spriteSize[0];
+        //textSize[1] = spriteSize[1];
         
         // Starting blocks
         for(int i = 1; i <= 3; i++) {
@@ -185,6 +190,8 @@ public class Main {
             nextBlock++;
             gameTimer = nextBlock;
             
+            drawText(gl, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 10, 100, camera, spriteSize);
+            
             // Animation speed for the lava
             if(nextBlock % 5 == 0)
 	            if(lavaTimer < 12)
@@ -200,6 +207,13 @@ public class Main {
             //System.out.println("diff:     " + Main.getGameTimer() / Main.getGameSpeed());
             //System.out.println("falldiff: " + blockVSP * (Main.getGameTimer() / Main.getGameSpeed()));
         }  
+    }
+    
+    public static void drawText(GL2 gl, String text, int x, int y, Camera cam, int[] textSize){
+        ArrayList<FontSprite> Text = new ArrayList<>(Font.getTextures(text, x, y, textSize, gl));
+        for (int i = 0; i < Text.size(); i++){
+            DrawSprite(gl, Text.get(i).getImage(), Text.get(i).getX(), Text.get(i).getY(), Text.get(i).getWidth(), Text.get(i).getHeight(), cam);
+        }
     }
     
     public static int getBlockVSP() {
