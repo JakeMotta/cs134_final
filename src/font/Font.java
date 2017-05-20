@@ -48,6 +48,10 @@ public class Font {
     public static int seven;
     public static int eight;
     public static int nine;
+    public static int question;
+    public static int colon;
+    public static int exclamation;
+
 
 	public Font(int[] spriteSize, GL2 gl){
 		A = Main.glTexImageTGAFile(gl, "Sprites/Font/A.tga", spriteSize);
@@ -86,8 +90,11 @@ public class Font {
     	seven = Main.glTexImageTGAFile(gl, "Sprites/Font/7.tga", spriteSize);
     	eight = Main.glTexImageTGAFile(gl, "Sprites/Font/8.tga", spriteSize);
     	nine = Main.glTexImageTGAFile(gl, "Sprites/Font/9.tga", spriteSize);
+    	question = Main.glTexImageTGAFile(gl, "Sprites/Font/question.tga", spriteSize);
+    	colon = Main.glTexImageTGAFile(gl, "Sprites/Font/colon.tga", spriteSize);
+    	exclamation = Main.glTexImageTGAFile(gl, "Sprites/Font/exclamation.tga", spriteSize);
     	
-    	alphabet = new int[]{A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,zero,one,two,three,four,five,six,seven,eight,nine};
+    	alphabet = new int[]{A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,zero,one,two,three,four,five,six,seven,eight,nine,question,colon,exclamation};
 	}
 	
 	public static ArrayList<FontSprite> getTextures(String text, int x, int y, int[] spriteSize, GL2 gl){
@@ -167,6 +174,12 @@ public class Font {
 	    		case '8': Text.add(new FontSprite(x + ((spriteSize[0]) * i), y, spriteSize, alphabet[34], gl));
 					break;
 	    		case '9': Text.add(new FontSprite(x + ((spriteSize[0]) * i), y, spriteSize, alphabet[35], gl));
+					break;
+	    		case '?': Text.add(new FontSprite(x + ((spriteSize[0]) * i), y, spriteSize, alphabet[36], gl));
+					break;
+	    		case ':': Text.add(new FontSprite(x + ((spriteSize[0]) * i), y, spriteSize, alphabet[37], gl));
+					break;
+	    		case '!': Text.add(new FontSprite(x + ((spriteSize[0]) * i), y, spriteSize, alphabet[38], gl));
 					break;
 				default: break;
     		}

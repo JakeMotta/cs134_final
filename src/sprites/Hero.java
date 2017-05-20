@@ -9,8 +9,10 @@ public class Hero extends Sprite implements Actor {
 
 	public static int currentImage;
 	
-	//public static int idleLeft[] = new int[8];
-	public static int myImg;
+	public static int walkLeft[] = new int[3];
+	public static int walkRight[] = new int[3];
+	public static int walkUp[] = new int[3];
+	public static int walkDown[] = new int[3];
     
     // Character Specifics
     private int fps = 6;
@@ -28,39 +30,37 @@ public class Hero extends Sprite implements Actor {
     int imgCounter = 0;
     public int punchCounter = 0;
     public int jumpCounter = 0;
-    
-    // hero offsets
-    int bottomOffset; //Offset to make player look like he's on the ground
-    int bottomOffsetTimer = 0; //Timer to allow Y offset
-    int bottomBG = 0;
-    
-    int leftOffset = 60;
-    int leftOffsetTimer = 0;
-    int leftBG = 0;
+    public int stack = 0;
     
 	public Hero(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
 
-		/**
-		idleLeft[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle1.tga", spriteSize);
-		idleLeft[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle2.tga", spriteSize);
-		idleLeft[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle3.tga", spriteSize);
-		idleLeft[3] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle4.tga", spriteSize);
-		idleLeft[4] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle5.tga", spriteSize);
-		idleLeft[5] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle6.tga", spriteSize);
-		idleLeft[6] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle7.tga", spriteSize);
-		idleLeft[7] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle8.tga", spriteSize);
-		**/
-		myImg = Main.glTexImageTGAFile(gl, "Sprites/Lava/lava.tga", spriteSize);
+		walkLeft[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl1.tga", spriteSize);
+		walkLeft[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl2.tga", spriteSize);
+		walkLeft[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl3.tga", spriteSize);
+		
+		walkRight[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr1.tga", spriteSize);
+		walkRight[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr2.tga", spriteSize);
+		walkRight[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr3.tga", spriteSize);
+		
+		walkUp[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu1.tga", spriteSize);
+		walkUp[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu2.tga", spriteSize);
+		walkUp[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu3.tga", spriteSize);
+		
+		walkDown[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd1.tga", spriteSize);
+		walkDown[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd2.tga", spriteSize);
+		walkDown[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd3.tga", spriteSize);
+		
 	    vsp = hsp = speed = 3;
 		direction = "right";
-	    width = spriteSize[0];
-	    height = spriteSize[1];
+	    width = 64;
+	    height = 64;
 	    keyDown = null;
-	    shape = "rect";
 	    isGrounded = false;
+	    //stack = Main.myGrid.getGrid(3);
+	    //System.out.println(stack);
 	    
-		//currentImage = idleRight[0];
+		currentImage = walkDown[2];
 	}
 	
 	// Set hero's speed
@@ -70,18 +70,13 @@ public class Hero extends Sprite implements Actor {
 
 	@Override
 	public void update(GL2 gl) {
-
-		/**
+		
+		stack = Main.myGrid.getGrid(getX()/64);
 		checkCollision();
 		
-		if(isGrounded == false) {
-			gravity();
-			// update yOffset with regards to current gravity speed
-			bottomOffset = (int) (11 + gravity);
-		}
 		
-		//System.out.println("bOS: " + bottomBG + ", hY: " + getY());
-		
+		if(isGrounded == false)
+			gravity();		
 		
 		if (shouldMove) {
 			// Play walking animation
@@ -91,8 +86,8 @@ public class Hero extends Sprite implements Actor {
 		        walkCounter++;
 		
 		    if(walkCounter % fps == 0)
-		    	//getWalkingImage(direction, walkCounter/fps);
-		} else {
+		    	getWalkingImage(direction, walkCounter/fps);
+		} /**else {
 			if(!attacking) {
 				walkCounter = -1;
 				
@@ -105,29 +100,61 @@ public class Hero extends Sprite implements Actor {
 				else
 					idleCounter++;
 					 
-				if(idleCounter % fps == 0)
+				//if(idleCounter % fps == 0)
 			    	//getIdleImage(direction, idleCounter/fps);
 			}
-		}
+		}**/
 	        
 	    setImage(currentImage);
-	    **/
+	    
 	    // Reset booleans
 	    shouldMove = false;
 	    attacking = false;
 	    keyDown = null;
-	    
-	    
+
 	    draw(gl);
 	}
 	
 	
-	public void checkCollision() {
+	public void checkCollision() {	
 		
+		if(getY() >= Main.worldHeight - (stack * 64) - height)
+			isGrounded = true;
+		else
+			isGrounded = false;
 		
-		// Collidable tile below
-        if(Main.background.levelCollision[sY()+1][sX()] != 0) {
-        	
+		//System.out.println("Grounded: " + isGrounded);
+		//System.out.println(stack);
+		
+		/**
+		for(int i = 0; i < Main.blockArray.size(); i++) {			
+			if(Main.AABB_Collision(this, Main.blockArray.get(i))) {
+				
+				if(keyDown == "left") {
+					canMoveLeft = false;
+				//	System.out.println("Left collision");
+				} else
+					canMoveLeft = true;
+				
+				if(keyDown == "right") {
+					canMoveRight = false;
+				//	System.out.println("right collision");
+				} else
+					canMoveRight = true;
+				
+				//if(keyDown == "up") {
+				//	System.out.println("up collision");
+				//} else
+				
+				
+				//if(keyDown == null)
+					//System.out.println("standstill collision");
+			} 
+				
+		
+		}
+		System.out.println("Grounded: " + isGrounded);
+        /**
         	// Offset resolution
         	if(bottomOffsetTimer == 0)
         		bottomBG = getY()+bottomOffset;
@@ -184,10 +211,7 @@ public class Hero extends Sprite implements Actor {
 	}
 	
 	public void gravity() {
-		moveY(gravity);
-		
-		if(gravityTimer % 10 == 0)
-			gravity++;
+		moveY(2);
 	}
 		
 	public void keyDown(String key) {
@@ -209,7 +233,7 @@ public class Hero extends Sprite implements Actor {
 				
 				if(jumpCounter <= 1)
 					if(getY() > 0)
-						setY(getY()-64-bottomOffset);				
+						setY(getY()-64);				
 			} 
 
 			if(keyDown == "left")
@@ -228,8 +252,21 @@ public class Hero extends Sprite implements Actor {
 				if(getY() < Main.worldHeight-getHeight())
 					moveY(vsp);	
 	}
-		
-	public String getShape() {
-		return shape;
-	}
+	
+	public static void getWalkingImage(String dir, int count) {
+    	switch (dir) {
+		case "left":
+			currentImage = walkLeft[count];
+			break;
+		case "right":
+			currentImage = walkRight[count];
+			break;
+		case "up":
+			currentImage = walkUp[count];
+			break;
+		case "down":
+			currentImage = walkDown[count];
+			break;
+    	}
+    }    
 }

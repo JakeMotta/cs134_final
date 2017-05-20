@@ -13,6 +13,8 @@ public class Block extends Sprite {
 	private int stack = 0;
 	private int fallDiff = 0;
 	private int vsp = Main.getBlockVSP();
+	private boolean remove = false;
+	private int blocksRemoved = 0;
 
 	public Block(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
@@ -20,6 +22,7 @@ public class Block extends Sprite {
 		width = height = 64;
 		blockImg = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block1.tga", spriteSize);
 		stack = Main.myGrid.getGrid(getX()/64);
+		blocksRemoved = Main.myGrid.blocksRemoved(getX()/64) * 64;
 		
 		setImage(blockImg);
 	}
@@ -32,8 +35,10 @@ public class Block extends Sprite {
 		if(shouldFall)
 			fall();
 		
+		/**
 		if(!shouldFall)
 			System.out.println(getY());
+		**/
 		
 		if(!shouldFall)
 			sink();
@@ -57,7 +62,7 @@ public class Block extends Sprite {
 	public void fall() {
 		moveY(vsp);
 	}
-	
+
 	public void checkBelow() {
 		// If block is at the bottom of the screen
 		if(getY() >= 896)
@@ -65,8 +70,15 @@ public class Block extends Sprite {
 				
 		fallDiff = vsp * (Main.getGameTimer() / Main.getGameSpeed());
 
-		if(getY() >= Main.worldHeight - (stack * 64) - 64 + fallDiff)
+		if(getY() >= Main.worldHeight - (stack * 64) - 64 + fallDiff - blocksRemoved)
 			shouldFall = false;	
+		
+		if(getY() >= 960)
+			remove = true;
+	}
+	
+	public boolean checkRemoval() {
+		return remove;
 	}
 	
 	public void setHP(int dmg) {

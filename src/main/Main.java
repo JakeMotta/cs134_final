@@ -43,7 +43,11 @@ public class Main {
     public static int gameTimer = 0;
     public static int gameSpeed = 100;
     public static int blockVSP = 4;
-               
+    public static int playerScore = 0;
+    public static String intToString = "";
+    public static ArrayList<Block> blockArray = new ArrayList<Block>();
+    public static String collisionResult = "";
+    
     public static void main(String[] args) {
           
 		// Game initialization goes here.
@@ -56,10 +60,7 @@ public class Main {
         long curFrameNS = System.nanoTime();
         
         camera = new Camera(window.getWidth(),window.getHeight());
-        
-        hero = new Hero(100, 100, spriteSize, gl);
-        ArrayList<Block> blockArray = new ArrayList<Block>();
-        
+        hero = new Hero(200, 400, spriteSize, gl);
         background = new Background(spriteSize, gl);
         worldWidth = background.getWorldWidth();
         worldHeight = background.getWorldHeight();
@@ -127,6 +128,23 @@ public class Main {
             
             camera.update(hero);
             background.update(gl);
+            
+            for(int bA = 0; bA < blockArray.size(); bA++) {
+            	
+        	    if(blockArray.get(bA).isAlive()) {
+        	    	if(!blockArray.get(bA).checkRemoval())
+        	    		blockArray.get(bA).update(gl);
+        	    	else {
+        	    		myGrid.remove(blockArray.get(bA).getX()/64);
+        	    		blockArray.remove(bA);
+        	    	}
+        	    }
+        	    else {
+        		    System.out.println("Remove me daddy");
+        		    blockArray.remove(bA);
+        	    }
+        	    
+            }
                 
             // Add new block 
             if(nextBlock % 100 == 0) {
@@ -159,20 +177,9 @@ public class Main {
             	// Remove background alert
 	            background.removeAlert(randomBlockX/64);
             }
-            
-            for(int bA = 0; bA < blockArray.size(); bA++) {
-            	
-        	    if(blockArray.get(bA).isAlive())
-        	    	blockArray.get(bA).update(gl);
-        	    else {
-        		    //System.out.println("Remove me daddy");
-        		    blockArray.remove(bA);
-        	    }
-        	    
-            }
-            
+                           
             hero.update(gl);
-            lava.update(gl, lavaTimer);
+            //lava.update(gl, lavaTimer);
              
             /**
             // Physics update
@@ -189,9 +196,7 @@ public class Main {
 
             nextBlock++;
             gameTimer = nextBlock;
-            
-            drawText(gl, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 10, 100, camera, spriteSize);
-            
+                        
             // Animation speed for the lava
             if(nextBlock % 5 == 0)
 	            if(lavaTimer < 12)
@@ -199,10 +204,26 @@ public class Main {
 	            else
 	            	lavaTimer = 0;      
          
+            if(nextBlock % 100 == 0) {
+            	playerScore += 1;
+            }
+            
             if(gameTimer % 1000 == 0) {
             	pow += 1;
             	//blockVSP = (int) Math.pow(2, pow);
             }
+            
+            intToString = String.valueOf(playerScore);
+            drawText(gl, "SCORE:" + intToString, 10, 10, camera, spriteSize);
+            
+            drawText(gl, "448", 10, 448, camera, spriteSize);
+            drawText(gl, "512", 10, 512, camera, spriteSize);
+            drawText(gl, "576", 10, 576, camera, spriteSize);
+            drawText(gl, "640", 10, 640, camera, spriteSize);
+            drawText(gl, "704", 10, 704, camera, spriteSize);
+            drawText(gl, "768", 10, 768, camera, spriteSize);
+            drawText(gl, "832", 10, 832, camera, spriteSize);
+            drawText(gl, "896", 10, 896, camera, spriteSize);
             
             //System.out.println("diff:     " + Main.getGameTimer() / Main.getGameSpeed());
             //System.out.println("falldiff: " + blockVSP * (Main.getGameTimer() / Main.getGameSpeed()));
@@ -282,9 +303,8 @@ public class Main {
 	     }
 	     return true;
     }
-   
-    public static boolean AABB_Collision(Sprite a, Sprite b)
-    {
+    
+    public static boolean AABB_Collision(Sprite a, Sprite b) {
 	     // box1 to the right
 	     if (a.getX() > b.getX() + b.getWidth()) {
 	     return false;
