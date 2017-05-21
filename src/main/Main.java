@@ -204,6 +204,10 @@ public class Main {
 	        		hero.keyDown("right");
 	        } else
 	        	pressedRight = 0;
+	        
+	        if (window.kbState[KeyEvent.VK_Z]) {
+	        	hero.keyDown("z");
+	        }
 
             nextBlock++;
             gameTimer = nextBlock;

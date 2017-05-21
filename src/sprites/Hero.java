@@ -14,6 +14,11 @@ public class Hero extends Sprite implements Actor {
 	private static int walkUp[] = new int[3];
 	private static int walkDown[] = new int[3];
     
+	private static int mineLeft[] = new int[3];
+	private static int mineRight[] = new int[3];
+	private static int mineUp[] = new int[3];
+	private static int mineDown[] = new int[3];
+	
     // Character Specifics
     private int fps = 6;
     
@@ -26,9 +31,8 @@ public class Hero extends Sprite implements Actor {
     
     // Counters
     private int walkCounter = 0;
-    private int idleCounter = 0;
     private int imgCounter = 0;
-    private int punchCounter = 0;
+    private int mineCounter = 0;
     private int jumpCounter = 0;
     private int blocksRemoved = 0;
     private int gravityInc = 20;
@@ -37,21 +41,33 @@ public class Hero extends Sprite implements Actor {
 	public Hero(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
 
+		// Walking textures
 		walkLeft[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl1.tga", spriteSize);
 		walkLeft[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl2.tga", spriteSize);
 		walkLeft[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl3.tga", spriteSize);
-		
 		walkRight[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr1.tga", spriteSize);
 		walkRight[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr2.tga", spriteSize);
 		walkRight[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr3.tga", spriteSize);
-		
 		walkUp[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu1.tga", spriteSize);
 		walkUp[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu2.tga", spriteSize);
 		walkUp[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu3.tga", spriteSize);
-		
 		walkDown[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd1.tga", spriteSize);
 		walkDown[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd2.tga", spriteSize);
 		walkDown[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd3.tga", spriteSize);
+		
+		// Mining textures
+		mineLeft[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/ml1.tga", spriteSize);
+		mineLeft[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/ml2.tga", spriteSize);
+		mineLeft[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/ml3.tga", spriteSize);
+		mineRight[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mr1.tga", spriteSize);
+		mineRight[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mr2.tga", spriteSize);
+		mineRight[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mr3.tga", spriteSize);
+		mineUp[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mu1.tga", spriteSize);
+		mineUp[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mu2.tga", spriteSize);
+		mineUp[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mu3.tga", spriteSize);
+		mineDown[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/md1.tga", spriteSize);
+		mineDown[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/md2.tga", spriteSize);
+		mineDown[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/md3.tga", spriteSize);
 		
 	    vsp = hsp = speed = Main.getBlockVSP();
 		direction = "right";
@@ -61,7 +77,7 @@ public class Hero extends Sprite implements Actor {
 	    isGrounded = false;
 	 	dummy = new Dummy(0,0,spriteSize,gl);
 	 	
-		setImage(walkDown[2]);
+	 	currentImage = walkDown[2];
 	}
 	
 	// Set hero's speed
@@ -87,50 +103,23 @@ public class Hero extends Sprite implements Actor {
 		if (shouldMove) {
 			
 			if(direction == "left")
-				setImage(walkLeft[2]);
+				currentImage = walkLeft[2];
 			
 			if(direction == "right")
-				setImage(walkRight[2]);
+				currentImage = walkRight[2];
 			
 			if(direction == "up")
-				setImage(walkUp[2]);
+				currentImage = walkUp[2];
 			
 			if(direction == "down")
-				setImage(walkDown[2]);
-		
-			/**
-			// Play walking animation
-		    if (walkCounter >= (fps*walkRight.length)-2)
-		        walkCounter = -1;
-		    else
-		        walkCounter++;
-		
-		    if(walkCounter % fps == 0)
-		    	getWalkingImage(direction, walkCounter/fps);
-		} else {
-			if(!attacking) {
-				walkCounter = -1;
-				
-				// Reset attacks
-				punchCounter = -1;
-	
-				// Play Idle animation
-				if(idleCounter >= (fps*idleRight.length)-2)
-					idleCounter = -1;
-				else
-					idleCounter++;
-					 
-				//if(idleCounter % fps == 0)
-			    	//getIdleImage(direction, idleCounter/fps);
-			}**/
-		}
-	        
-	    //setImage(currentImage);
+				currentImage = walkDown[2];
 	    
 	    // Reset booleans
 	    shouldMove = canMoveLeft = canMoveRight = false;
 	    attacking = false;
 	    keyDown = null;
+	    
+	    setImage(currentImage);
 
 	    draw(gl);
 	}
@@ -223,8 +212,6 @@ public class Hero extends Sprite implements Actor {
 	public void keyDown(String key) {
 		keyDown = key;
 		
-		//System.out.println("shouldMove: " + shouldMove);
-
 		// Direction keys
 		if((keyDown == "up" || keyDown == "down" || keyDown == "left" || keyDown == "right")) {
 			direction = keyDown;
@@ -236,7 +223,6 @@ public class Hero extends Sprite implements Actor {
 		// If movement keys are pressed		
 		if(keyDown == "up" && canJump == true && checkAbove()) {
 			jumpCounter++;
-			//System.out.println("jumpCounter: " + jumpCounter);
 				
 			if(jumpCounter <= 1)
 				if(getY() > 0)
@@ -254,15 +240,33 @@ public class Hero extends Sprite implements Actor {
 		//if(keyDown == "down") 
 		//	if(getY() < Main.worldHeight-getHeight())
 		//		moveY(vsp);	
+		
+		if(keyDown == "z") {
+			System.out.println("Z IS PRESSED!");
+			// Play mining animation
+			if (mineCounter >= (fps*mineRight.length)-2)
+				mineCounter = -1;
+			else
+				mineCounter++;
+			
+			if(mineCounter % fps == 0) 
+				getMiningImage(direction, mineCounter/fps);
+		}
 	}
 	
-	public static void getWalkingImage(String dir, int count) {
+	public static void getMiningImage(String dir, int count) {
     	switch (dir) {
 		case "left":
-			currentImage = walkLeft[count];
+			currentImage = mineLeft[count];
 			break;
 		case "right":
-			currentImage = walkRight[count];
+			currentImage = mineRight[count];
+			break;
+		case "up":
+			currentImage = mineUp[count];
+			break;
+		case "down":
+			currentImage = mineDown[count];
 			break;
     	}
     }
