@@ -6,7 +6,10 @@ import com.jogamp.opengl.*;
 import Camera.Camera;
 import Camera.Window;
 import background.Background;
+import background.Lava;
+import background.blockGrid;
 import sprites.*;
+import font.Font;
 
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
@@ -31,36 +34,56 @@ public class Main {
     public static Camera camera;
     public static Hero hero;
     public static Background background;
-    private static int grass_top_left_corner;
+    public static blockGrid myGrid;
+    public static Lava lava;
+    public static Font font;
     
     public static int worldWidth;
     public static int worldHeight;
-               
+    public static int gameTimer = 0;
+    public static int gameSpeed = 100;
+    public static int blockVSP = 2;
+    public static int playerScore = 0;
+    public static String intToString = "";
+    public static ArrayList<Block> blockArray = new ArrayList<Block>();
+    public static String collisionResult = "";
+    public static int pressedRight, pressedLeft, pressedUp;
+    
     public static void main(String[] args) {
           
 		// Game initialization goes here.
     	
     	window = new Window();
     	GL2 gl = window.getGL();
-    	
-    	grass_top_left_corner = Main.glTexImageTGAFile(gl, "Sprites/Map/0.tga", spriteSize);
-    	
+    	    	
     	// The game loop
         long lastFrameNS;
         long curFrameNS = System.nanoTime();
-
+        
         camera = new Camera(window.getWidth(),window.getHeight());
-        
-        hero = new Hero(950, 2050, spriteSize, gl);
-        ArrayList<Fire> fireArray = new ArrayList<Fire>();
-        
+        hero = new Hero(512, 0, spriteSize, gl);
         background = new Background(spriteSize, gl);
         worldWidth = background.getWorldWidth();
         worldHeight = background.getWorldHeight();
-         
+        myGrid = new blockGrid();
+        lava = new Lava(spriteSize, gl, 800);
+        font = new Font(spriteSize, gl);
+        pressedRight = pressedLeft = pressedUp = 0;
+        
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
         int lastPhysicsFrameMs = 0;
+        int nextBlock = 0, randomBlockX = 0, temp = 0, pow = 0;
+        int lavaTimer = 0;
+        
+        // Starting blocks
+        for(int i = 1; i <= 3; i++) {
+        	for(int j = 0; j < 10; j++) {
+		        Block block;
+		    	block = new Block(j*64, worldHeight-(64*i+blockVSP), spriteSize, gl);
+		    	blockArray.add(block);    	
+        	}
+        }
         
         while (!shouldExit) {
         	
@@ -78,86 +101,172 @@ public class Main {
                 shouldExit = true;
                 break;
             }
-                         
-            // Game logic goes here.
-            if (window.kbState[KeyEvent.VK_ESCAPE]) {
-                shouldExit = true;
-            }
-
-            if (window.kbState[KeyEvent.VK_UP]) {   
-	        		hero.keyDown("up");      		
-	        } else {
-	        	hero.jumpCounter = 0;
-	        }
-	
-	        if (window.kbState[KeyEvent.VK_DOWN]) {
-	        		hero.keyDown("down");
-	        }
-	
-	        if (window.kbState[KeyEvent.VK_LEFT]) {
-	        		hero.keyDown("left");      		
-	        }
-	        
-	        if (window.kbState[KeyEvent.VK_RIGHT]) {
-	        		hero.keyDown("right");
-	        }
-	        
-	        if (window.kbState[KeyEvent.VK_Z]) {
-        		hero.keyDown("z");
-        		  				
-        		if(hero.punchCounter == 6 || hero.punchCounter == 24) {
-        			Fire fire;
-        			
-        			if(hero.getDirection() == "left") {
-    			   		fire = new Fire(hero.getX()-20, hero.getY()+15, spriteSize, gl);
-    			   		fire.setDirection("left");
-        			}
-        			else {
-        				fire = new Fire(hero.getX()+60, hero.getY()+15, spriteSize, gl);
-        				fire.setDirection("right");
-        			}
-        			
-        			fireArray.add(fire);
-        		}
-	        }
-	         
+                                  
             window.gl.glClearColor(0, 0, 0, 1);
             window.gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
             
             camera.update(hero);
             background.update(gl);
             
+            for(int bA = 0; bA < blockArray.size(); bA++) {
+            	
+        	    if(blockArray.get(bA).isAlive()) { 
+        	    	if(!blockArray.get(bA).checkRemoval()) { // Block is alive
+        	    		blockArray.get(bA).update(gl);
+        	    	}
+        	    	else { // Block is below screen and needs to be removed
+        	    		myGrid.remove(blockArray.get(bA).getX()/64);
+        	    		blockArray.remove(bA);
+        	    	}
+        	    }
+        	    else { // Block is dead (from player)
+        		    System.out.println("Remove me daddy");
+        		    blockArray.remove(bA);
+        	    }
+            }
             
+            // Add new block 
+            if(nextBlock % 100 == 0) {
+            	
+            	int[] blockHistory = myGrid.getHistory();
+
+            	// Get random X position for block
+            	randomBlockX = getRandom(10) * 64;
+            	
+            	// If two blocks in a row
+            	if(blockHistory[0] == randomBlockX)
+	            	while(randomBlockX == blockHistory[0])
+	            		randomBlockX = getRandom(10) * 64;
+
+            	// Add background alert
+            	background.addAlert(randomBlockX/64);
+
+            	Block block;
+            	block = new Block(randomBlockX, -128, spriteSize, gl); 
+	            blockArray.add(block);    	
+	            
+	            temp = nextBlock + 25;
+	            
+	            // Add block to grid
+	    		myGrid.addToGrid(randomBlockX/64);
+            }
+            
+            if(nextBlock >= temp) {
+            	// Remove background alert
+	            background.removeAlert(randomBlockX/64);
+            }
+                           
+            hero.update(gl);
+            lava.update(gl, lavaTimer);
              
+            /**
             // Physics update
             do {
  	           // 1. Physics movement
  	           // 2. Physics collision detection
  	           // 3. Physics collision resolution
-            	
-            	// Draw any fire sprites created in-game
-            	for(int fA = 0; fA < fireArray.size(); fA++) {
-            		if(AABB_Collision(fireArray.get(fA), block)) {
-            			fireArray.get(fA).collision = true;
-            			block.setHP(fireArray.get(fA).damage);
-            		}
-                
-            	    if(fireArray.get(fA).isAlive)
-            		    fireArray.get(fA).update(gl);
-            	    else {
-            		    System.out.println("Remove me daddy");
-            		    fireArray.remove(fA);
-            	    }
-            	    
-                }   
-         	              
-                hero.update(gl);
+      
+         	   //hero.update(gl);
 
                 lastPhysicsFrameMs += physicsDeltaMs;
             } while (lastPhysicsFrameMs + physicsDeltaMs < deltaTimeMS );
+            **/
+            
+            // Game logic goes here.
+            if (window.kbState[KeyEvent.VK_ESCAPE]) {
+                shouldExit = true;
+            }
 
-            //System.out.println("cur: " + window.kbState + ", last: " + window.kbPrevState);
+            if (window.kbState[KeyEvent.VK_UP]) {   
+            	pressedUp++;
+            	
+            	if(pressedUp == 1)
+            		hero.keyDown("up");
+	        } else
+	        	pressedUp = 0;
+	
+	        if (window.kbState[KeyEvent.VK_DOWN]) {
+	        	hero.keyDown("down");
+	        }
+	
+	        if (window.kbState[KeyEvent.VK_LEFT]) {
+	        	pressedLeft++;
+	        	
+	        	if(pressedLeft == 1)
+	        		hero.keyDown("left");
+	        } else
+	        	pressedLeft = 0;
+	        
+	        if (window.kbState[KeyEvent.VK_RIGHT]) {
+	        	pressedRight++;
+	        	
+	        	if(pressedRight == 1)
+	        		hero.keyDown("right");
+	        } else
+	        	pressedRight = 0;
+	        
+	        if (window.kbState[KeyEvent.VK_Z]) {
+	        	hero.keyDown("z");
+	        }
+
+            nextBlock++;
+            gameTimer = nextBlock;
+                        
+            // Animation speed for the lava
+            if(nextBlock % 5 == 0)
+	            if(lavaTimer < 12)
+	            	lavaTimer++;
+	            else
+	            	lavaTimer = 0;      
+         
+            if(nextBlock % 100 == 0) {
+            	playerScore += 1;
+            }
+            
+            if(gameTimer % 1000 == 0) {
+            	pow += 1;
+            	//blockVSP = (int) Math.pow(2, pow);
+            }
+            
+            intToString = String.valueOf(playerScore);
+            drawText(gl, "SCORE:" + intToString, 10, 10, camera, spriteSize);
+            
+            drawText(gl, "448", 10, 448, camera, spriteSize);
+            drawText(gl, "512", 10, 512, camera, spriteSize);
+            drawText(gl, "576", 10, 576, camera, spriteSize);
+            drawText(gl, "640", 10, 640, camera, spriteSize);
+            drawText(gl, "704", 10, 704, camera, spriteSize);
+            drawText(gl, "768", 10, 768, camera, spriteSize);
+            drawText(gl, "832", 10, 832, camera, spriteSize);
+            drawText(gl, "896", 10, 896, camera, spriteSize);
+            
+            //System.out.println("diff:     " + Main.getGameTimer() / Main.getGameSpeed());
+            //System.out.println("falldiff: " + blockVSP * (Main.getGameTimer() / Main.getGameSpeed()));
+        }  
+    }
+    
+    public static void drawText(GL2 gl, String text, int x, int y, Camera cam, int[] textSize){
+        ArrayList<FontSprite> Text = new ArrayList<>(Font.getTextures(text, x, y, textSize, gl));
+        for (int i = 0; i < Text.size(); i++){
+            DrawSprite(gl, Text.get(i).getImage(), Text.get(i).getX(), Text.get(i).getY(), Text.get(i).getWidth(), Text.get(i).getHeight(), cam);
         }
+    }
+    
+    public static int getBlockVSP() {
+    	return blockVSP;
+    }
+    
+    public static int getGameTimer() {
+    	return gameTimer;
+    }
+    
+    public static int getGameSpeed() {
+    	return gameSpeed;
+    }
+    
+    public static int getRandom(int max) {
+    	int randomNum = (int)(Math.random() * max);
+		return randomNum;
     }
         
     public static boolean[] getKBState() {
@@ -209,9 +318,8 @@ public class Main {
 	     }
 	     return true;
     }
-   
-    public static boolean AABB_Collision(Sprite a, Sprite b)
-    {
+    
+    public static boolean AABB_Collision(Sprite a, Sprite b) {
 	     // box1 to the right
 	     if (a.getX() > b.getX() + b.getWidth()) {
 	     return false;
@@ -231,6 +339,27 @@ public class Main {
 	     
 	     return true;
     }
+    
+    public static boolean Dummy_Collision(Dummy a, Sprite b) {
+	     // box1 to the right
+	     if (a.getX() > b.getX() + b.getWidth()) {
+	     return false;
+	     }
+	     // box1 to the left
+	     if (a.getX() + a.getWidth() < b.getX()) {
+	     return false;
+	     }
+	     // box1 below
+	     if (a.getY() > b.getY() + b.getHeight()) {
+	     return false;
+	     }
+	     // box1 above
+	     if (a.getY() + a.getHeight() < b.getY()) {
+	     return false;
+	     }
+	     
+	     return true;
+   }
     
     public static void DrawSprite(GL2 gl, int tex, int x, int y, int w, int h, Camera camera) {
         glDrawSprite(gl, tex, x - camera.getX(), y - camera.getY(), w, h);

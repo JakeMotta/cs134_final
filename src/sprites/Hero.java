@@ -9,189 +9,209 @@ public class Hero extends Sprite implements Actor {
 
 	public static int currentImage;
 	
-	//public static int idleLeft[] = new int[8];
+	private static int walkLeft[] = new int[3];
+	private static int walkRight[] = new int[3];
+	private static int walkUp[] = new int[3];
+	private static int walkDown[] = new int[3];
     
+	private static int mineLeft[] = new int[3];
+	private static int mineRight[] = new int[3];
+	private static int mineUp[] = new int[3];
+	private static int mineDown[] = new int[3];
+	
     // Character Specifics
     private int fps = 6;
     
     // Strings
-	String shape = "rect";
-	String keyDown = null;
+    private String shape = "rect";
+    private String keyDown = null;
 	
 	// Booleans
-    boolean attacking = false;
+    private boolean attacking = false;
     
     // Counters
-    int walkCounter = 0;
-    int idleCounter = 0;
-    int imgCounter = 0;
-    public int punchCounter = 0;
-    public int jumpCounter = 0;
-    
-    // hero offsets
-    int bottomOffset; //Offset to make player look like he's on the ground
-    int bottomOffsetTimer = 0; //Timer to allow Y offset
-    int bottomBG = 0;
-    
-    int leftOffset = 60;
-    int leftOffsetTimer = 0;
-    int leftBG = 0;
+    private int walkCounter = 0;
+    private int imgCounter = 0;
+    private int mineCounter = 0;
+    private int jumpCounter = 0;
+    private int blocksRemoved = 0;
+    private int gravityInc = 20;
+    Dummy dummy;
     
 	public Hero(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
 
-		/**
-		idleLeft[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle1.tga", spriteSize);
-		idleLeft[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle2.tga", spriteSize);
-		idleLeft[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle3.tga", spriteSize);
-		idleLeft[3] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle4.tga", spriteSize);
-		idleLeft[4] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle5.tga", spriteSize);
-		idleLeft[5] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle6.tga", spriteSize);
-		idleLeft[6] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle7.tga", spriteSize);
-		idleLeft[7] = Main.glTexImageTGAFile(gl, "Sprites/Hero/Idle/l_idle8.tga", spriteSize);
-		**/
+		// Walking textures
+		walkLeft[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl1.tga", spriteSize);
+		walkLeft[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl2.tga", spriteSize);
+		walkLeft[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl3.tga", spriteSize);
+		walkRight[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr1.tga", spriteSize);
+		walkRight[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr2.tga", spriteSize);
+		walkRight[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr3.tga", spriteSize);
+		walkUp[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu1.tga", spriteSize);
+		walkUp[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu2.tga", spriteSize);
+		walkUp[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu3.tga", spriteSize);
+		walkDown[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd1.tga", spriteSize);
+		walkDown[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd2.tga", spriteSize);
+		walkDown[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd3.tga", spriteSize);
 		
-	    vsp = hsp = speed = 3;
+		// Mining textures
+		mineLeft[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/ml1.tga", spriteSize);
+		mineLeft[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/ml2.tga", spriteSize);
+		mineLeft[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/ml3.tga", spriteSize);
+		mineRight[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mr1.tga", spriteSize);
+		mineRight[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mr2.tga", spriteSize);
+		mineRight[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mr3.tga", spriteSize);
+		mineUp[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mu1.tga", spriteSize);
+		mineUp[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mu2.tga", spriteSize);
+		mineUp[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/mu3.tga", spriteSize);
+		mineDown[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/md1.tga", spriteSize);
+		mineDown[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/md2.tga", spriteSize);
+		mineDown[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/md3.tga", spriteSize);
+		
+	    vsp = hsp = speed = Main.getBlockVSP();
 		direction = "right";
-	    width = spriteSize[0];
-	    height = spriteSize[1];
+	    width = 64;
+	    height = 64;
 	    keyDown = null;
-	    shape = "rect";
 	    isGrounded = false;
-	    
-		currentImage = idleRight[0];
+	 	dummy = new Dummy(0,0,spriteSize,gl);
+	 	
+	 	currentImage = walkDown[2];
 	}
 	
 	// Set hero's speed
 	public void setSpeed(long bgSpeed){
-		speed = bgSpeed;
+		speed = vsp;
 	}
 
 	@Override
 	public void update(GL2 gl) {
 
+		dummy.update(gl);
+		sink();
 		checkCollision();
 		
-		if(isGrounded == false) {
-			gravity();
-			// update yOffset with regards to current gravity speed
-			bottomOffset = (int) (11 + gravity);
+	
+		if(isGrounded == false)
+			gravity();		
+		else {
+			gravityInc = 20;
+			gravityTimer = 0;
 		}
-		
-		//System.out.println("bOS: " + bottomBG + ", hY: " + getY());
-		
 		
 		if (shouldMove) {
-			// Play walking animation
-		    if (walkCounter >= (fps*walkRight.length)-2)
-		        walkCounter = -1;
-		    else
-		        walkCounter++;
-		
-		    if(walkCounter % fps == 0)
-		    	//getWalkingImage(direction, walkCounter/fps);
-		} else {
-			if(!attacking) {
-				walkCounter = -1;
-				
-				// Reset attacks
-				punchCounter = -1;
-	
-				// Play Idle animation
-				if(idleCounter >= (fps*idleRight.length)-2)
-					idleCounter = -1;
-				else
-					idleCounter++;
-					 
-				if(idleCounter % fps == 0)
-			    	//getIdleImage(direction, idleCounter/fps);
-			}
-		}
-	        
-	    setImage(currentImage);
+			
+			if(direction == "left")
+				currentImage = walkLeft[2];
+			
+			if(direction == "right")
+				currentImage = walkRight[2];
+			
+			if(direction == "up")
+				currentImage = walkUp[2];
+			
+			if(direction == "down")
+				currentImage = walkDown[2];
 	    
 	    // Reset booleans
-	    shouldMove = false;
+	    shouldMove = canMoveLeft = canMoveRight = false;
 	    attacking = false;
 	    keyDown = null;
 	    
+	    setImage(currentImage);
+
 	    draw(gl);
 	}
 	
+	public void checkVSP() {
+		vsp = Main.getBlockVSP();
+	}
 	
-	public void checkCollision() {
+	public void sink() {
+		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 
+			moveY(vsp);	
+	}
+	
+	public void checkCollision() {			
+		dummy.setWidth(60);
+		dummy.setHeight(60);
+		dummy.setX(getX()+2);
+		dummy.setY(getY()+height-2);
 		
-		
-		// Collidable tile below
-        if(Main.background.levelCollision[sY()+1][sX()] != 0) {
-        	
-        	// Offset resolution
-        	if(bottomOffsetTimer == 0)
-        		bottomBG = getY()+bottomOffset;
-        	bottomOffsetTimer++;
-        	
-        	// What happens when the hero is on the ground
-        	if(getY() >= bottomBG) {
-        		isGrounded = true;
-        		gravityTimer = 0;
-        		gravity = 1; // reset gravity back to 1
-        		canJump = true;
-        	}
-        } else { // when hero is not on the ground
-        	bottomOffsetTimer = 0;
-        	isGrounded = false;
-        	gravityTimer++;
-        	canJump = false;
-        }
-        
-        // Collidable tile to the right
-        if(Main.background.levelCollision[sY()][sX()+1] != 0) {
-        	canMoveRight = false;
-        	System.out.println("collided right!");
-        } else { 
-        	canMoveRight = true;
-        }
-        
-     // Collidable tile to the left
-        if(Main.background.levelCollision[sY()][sX()] != 0) {
-        	canMoveLeft = false;
-        	System.out.println("collided left!");
-        } else { 
-        	canMoveLeft = true;
-        }
-
-        /**
-        // Collidable tile to the left
-        if(Main.background.levelCollision[sY()][sX()-1] != 0) {
-        	
-        	// Offset resolution
-        	if(leftOffsetTimer == 0)
-        		leftBG = getX()-leftOffset;
-        	leftOffsetTimer++;
-        	
-        	// What happens the block is to the left
-        	if(getX() <= leftBG) {
-        		canMoveLeft = false;
-        	}
-        } else { 
-        	canMoveLeft = true;
-        	leftOffsetTimer = 0;
-        }**/
-        
+		for(int i = 0; i < Main.blockArray.size(); i++) {		
+			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
+				isGrounded = true;
+				canJump = true;
+				break;
+			} else {
+				isGrounded = false;
+				canJump = false;
+				jumpCounter = 0;
+			}
+		}
 	}
 	
 	public void gravity() {
-		moveY(gravity);
+		gravityTimer++;
 		
-		if(gravityTimer % 10 == 0)
-			gravity++;
+		if(gravityTimer % gravityInc == 0) {
+			moveY(64);
+			gravityTimer = 0;
+			
+			if(gravityInc > 6)
+				gravityInc -= 4;
+		}
+	}
+	
+	public boolean checkLeft() {
+		dummy.setWidth(64);
+		dummy.setHeight(64);
+		dummy.setX(getX()-width+5);
+		dummy.setY(getY()-5);
+		
+		for(int i = 0; i < Main.blockArray.size(); i++) {		
+			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
+				System.out.println("coliision left!");
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean checkRight() {
+		dummy.setWidth(64);
+		dummy.setHeight(64);
+		dummy.setX(getX()+width-5);
+		dummy.setY(getY()-5);
+		
+		for(int i = 0; i < Main.blockArray.size(); i++) {		
+			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
+				System.out.println("coliision right!");
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean checkAbove() {
+		dummy.setWidth(32);
+		dummy.setHeight(68);
+		dummy.setX(getX()+16);
+		dummy.setY(getY()-height);
+		
+		for(int i = 0; i < Main.blockArray.size(); i++) {		
+			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
+				System.out.println("coliision above!");
+				return false;
+			}
+		}
+		return true;
 	}
 		
 	public void keyDown(String key) {
 		keyDown = key;
 		
-		//System.out.println("shouldMove: " + shouldMove);
-
 		// Direction keys
 		if((keyDown == "up" || keyDown == "down" || keyDown == "left" || keyDown == "right")) {
 			direction = keyDown;
@@ -200,34 +220,60 @@ public class Hero extends Sprite implements Actor {
 		else
 			shouldMove = false;
 	
-		// Attack keys
-		if(keyDown == "z") {
-			attacking = true;
-			shouldMove = false;
-		}
-		else
-			attacking = false;
-		
 		// If movement keys are pressed		
-			if(keyDown == "up" && canJump == true) {
-				jumpCounter++;
+		if(keyDown == "up" && canJump == true && checkAbove()) {
+			jumpCounter++;
 				
-				if(jumpCounter <= 1)
-					if(getY() > 0)
-						setY(getY()-64-bottomOffset);				
-			} 
+			if(jumpCounter <= 1)
+				if(getY() > 0)
+					setY(getY()-64);				
+		}
 
-			if(keyDown == "left" && canMoveLeft == true)
-				if (getX() > 0)
-	    			moveX(-hsp);
+		if(keyDown == "left" && checkLeft())
+			if (getX() > 0)
+	    		moveX(-64);
 			
-			
-			if(keyDown == "right" && canMoveRight == true) 
-				if(getX() < Main.worldWidth-getWidth())
-					moveX(hsp);			
-	}
+		if(keyDown == "right" && checkRight()) 
+			if(getX() < Main.worldWidth-getWidth())
+				moveX(64);	
+
+		//if(keyDown == "down") 
+		//	if(getY() < Main.worldHeight-getHeight())
+		//		moveY(vsp);	
 		
-	public String getShape() {
-		return shape;
+		if(keyDown == "z") {
+			System.out.println("Z IS PRESSED!");
+			// Play mining animation
+			if (mineCounter >= (fps*mineRight.length)-2)
+				mineCounter = -1;
+			else
+				mineCounter++;
+			
+			if(mineCounter % fps == 0) 
+				getMiningImage(direction, mineCounter/fps);
+		}
 	}
+	
+	public static void getMiningImage(String dir, int count) {
+    	switch (dir) {
+		case "left":
+			currentImage = mineLeft[count];
+			break;
+		case "right":
+			currentImage = mineRight[count];
+			break;
+		case "up":
+			currentImage = mineUp[count];
+			break;
+		case "down":
+			currentImage = mineDown[count];
+			break;
+    	}
+    }
+
+	@Override
+	public String getShape() {
+		// TODO Auto-generated method stub
+		return null;
+	}    
 }

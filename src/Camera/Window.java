@@ -19,8 +19,8 @@ public class Window {
     public GL2 gl;
     public GLWindow myWindow;
     
-    private int width = 800;
-    private int height = 600;
+    private int width = 640;
+    private int height = 960;
     
     public Window() {
     	GLProfile gl2Profile;
@@ -38,7 +38,7 @@ public class Window {
 		// Create the myWindow and OpenGL context.
 	    myWindow = GLWindow.create(new GLCapabilities(gl2Profile));
 	    myWindow.setSize(width, height);
-	    myWindow.setTitle("I can't charge my phone and listen to music at the same time");
+	    myWindow.setTitle("UCK!");
 	    myWindow.setVisible(true);
 	    myWindow.setDefaultCloseOperation(
 	            WindowClosingProtocol.WindowClosingMode.DISPOSE_ON_CLOSE);
