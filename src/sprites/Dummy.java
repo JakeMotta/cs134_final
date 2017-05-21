@@ -19,9 +19,10 @@ public class Dummy extends Sprite {
 
 	public Dummy(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
-
+		
 		width = height = 64;
 		dummyImg = Main.glTexImageTGAFile(gl, "Sprites/Dummy/Dummy.tga", spriteSize);
+		vsp = Main.getBlockVSP();
 		
 		setImage(dummyImg);
 	}
@@ -34,8 +35,18 @@ public class Dummy extends Sprite {
 		height = h;
 	}
 	
+	public void checkVSP() {
+		vsp = Main.getBlockVSP();
+	}
+	
+	public void sink() {
+		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 
+			moveY(vsp);	
+	}
+	
 	public void update(GL2 gl) {
 		setImage(dummyImg);
-		//draw(gl);
+		sink();
+		draw(gl);
 	}
 }

@@ -25,9 +25,11 @@ public class Hero extends Sprite implements Actor {
     // Strings
     private String shape = "rect";
     private String keyDown = null;
+    private String blockLocation = "down";
 	
 	// Booleans
     private boolean attacking = false;
+    private boolean isMining = false;
     
     // Counters
     private int walkCounter = 0;
@@ -36,7 +38,8 @@ public class Hero extends Sprite implements Actor {
     private int jumpCounter = 0;
     private int blocksRemoved = 0;
     private int gravityInc = 20;
-    Dummy dummy;
+    public Dummy dummy;
+    public Dummy floorDummy;
     
 	public Hero(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
@@ -76,6 +79,7 @@ public class Hero extends Sprite implements Actor {
 	    keyDown = null;
 	    isGrounded = false;
 	 	dummy = new Dummy(0,0,spriteSize,gl);
+	 	floorDummy = new Dummy(0,0,spriteSize,gl);
 	 	
 	 	currentImage = walkDown[2];
 	}
@@ -89,8 +93,10 @@ public class Hero extends Sprite implements Actor {
 	public void update(GL2 gl) {
 
 		dummy.update(gl);
+		
 		sink();
 		checkCollision();
+		checkMining();
 		
 	
 		if(isGrounded == false)
@@ -113,15 +119,45 @@ public class Hero extends Sprite implements Actor {
 			
 			if(direction == "down")
 				currentImage = walkDown[2];
+		}
 	    
 	    // Reset booleans
 	    shouldMove = canMoveLeft = canMoveRight = false;
 	    attacking = false;
 	    keyDown = null;
+	    isMining = false;
+	    
+	    System.out.println("Block Location: " + blockLocation);
+	    System.out.println("direction: " + direction);
 	    
 	    setImage(currentImage);
 
 	    draw(gl);
+	}
+	
+	public boolean miningBlock() {
+		return isMining;
+	}
+		
+	public void checkMining() {
+		
+		if(direction == "left" && isMining && !checkLeft()) {
+			
+			System.out.println("Correctly mining left!");
+		}
+		
+		if(direction == "right" && isMining && !checkRight()) {
+			System.out.println("Correctly mining right!");
+		}
+		
+		if(direction == "up" && isMining && !checkAbove()) {
+			
+			System.out.println("Correctly mining up!");
+		}
+		
+		if(direction == "down" && isMining && !checkBelow()) {
+			System.out.println("Correctly mining down!");
+		}
 	}
 	
 	public void checkVSP() {
@@ -134,13 +170,13 @@ public class Hero extends Sprite implements Actor {
 	}
 	
 	public void checkCollision() {			
-		dummy.setWidth(60);
-		dummy.setHeight(60);
-		dummy.setX(getX()+2);
-		dummy.setY(getY()+height-2);
+		floorDummy.setWidth(60);
+		floorDummy.setHeight(60);
+		floorDummy.setX(getX()+2);
+		floorDummy.setY(getY()+height-2);
 		
 		for(int i = 0; i < Main.blockArray.size(); i++) {		
-			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
+			if(Main.Dummy_Collision(floorDummy, Main.blockArray.get(i))) {
 				isGrounded = true;
 				canJump = true;
 				break;
@@ -150,6 +186,10 @@ public class Hero extends Sprite implements Actor {
 				jumpCounter = 0;
 			}
 		}
+	}
+	
+	public String getBlockLocaction() {
+		return blockLocation;
 	}
 	
 	public void gravity() {
@@ -165,47 +205,58 @@ public class Hero extends Sprite implements Actor {
 	}
 	
 	public boolean checkLeft() {
-		dummy.setWidth(64);
-		dummy.setHeight(64);
-		dummy.setX(getX()-width+5);
-		dummy.setY(getY()-5);
+		dummy.setWidth(58);
+		dummy.setHeight(58);
+		dummy.setX(getX()-width+4);
+		dummy.setY(getY()+2);
 		
-		for(int i = 0; i < Main.blockArray.size(); i++) {		
+		for(int i = 0; i < Main.blockArray.size(); i++)
 			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
-				System.out.println("coliision left!");
+				blockLocation = "left";
 				return false;
 			}
-		}
 		return true;
 	}
 	
 	public boolean checkRight() {
-		dummy.setWidth(64);
-		dummy.setHeight(64);
-		dummy.setX(getX()+width-5);
-		dummy.setY(getY()-5);
+		dummy.setWidth(58);
+		dummy.setHeight(58);
+		dummy.setX(getX()+width+4);
+		dummy.setY(getY()+2);
 		
-		for(int i = 0; i < Main.blockArray.size(); i++) {		
+		for(int i = 0; i < Main.blockArray.size(); i++)	
 			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
-				System.out.println("coliision right!");
+				blockLocation = "right";
 				return false;
 			}
-		}
 		return true;
 	}
 	
 	public boolean checkAbove() {
 		dummy.setWidth(32);
-		dummy.setHeight(68);
+		dummy.setHeight(64);
 		dummy.setX(getX()+16);
 		dummy.setY(getY()-height);
 		
-		for(int i = 0; i < Main.blockArray.size(); i++) {		
+		for(int i = 0; i < Main.blockArray.size(); i++)	
 			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
-				System.out.println("coliision above!");
-				return false;
+				blockLocation = "up";
+				return false;	
 			}
-		}
+		return true;
+	}
+	
+	public boolean checkBelow() {
+		dummy.setWidth(58);
+		dummy.setHeight(58);
+		dummy.setX(getX()+2);
+		dummy.setY(getY()+height-2);
+		
+		for(int i = 0; i < Main.blockArray.size(); i++)	
+			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
+				blockLocation = "down";
+				return false;	
+			}
 		return true;
 	}
 		
@@ -237,12 +288,9 @@ public class Hero extends Sprite implements Actor {
 			if(getX() < Main.worldWidth-getWidth())
 				moveX(64);	
 
-		//if(keyDown == "down") 
-		//	if(getY() < Main.worldHeight-getHeight())
-		//		moveY(vsp);	
-		
 		if(keyDown == "z") {
-			System.out.println("Z IS PRESSED!");
+			isMining = true;
+			
 			// Play mining animation
 			if (mineCounter >= (fps*mineRight.length)-2)
 				mineCounter = -1;
@@ -251,7 +299,8 @@ public class Hero extends Sprite implements Actor {
 			
 			if(mineCounter % fps == 0) 
 				getMiningImage(direction, mineCounter/fps);
-		}
+		} else
+			isMining = false;
 	}
 	
 	public static void getMiningImage(String dir, int count) {

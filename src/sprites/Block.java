@@ -42,9 +42,18 @@ public class Block extends Sprite {
 		
 		checkBelow();
 		checkVSP();
+		checkMined();
 		
 		setImage(blockImg);
 		draw(gl);
+	}
+	
+	public void checkMined() {
+		if(Main.Dummy_Collision(Main.hero.dummy, this)) {
+			if(Main.hero.miningBlock() && Main.hero.getDirection() == Main.hero.getBlockLocaction()) {
+				hp = 0;
+			}
+		}
 	}
 	
 	public void checkVSP() {
