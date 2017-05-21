@@ -19,8 +19,6 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javax.imageio.ImageIO;
 
@@ -49,7 +47,6 @@ public class Main {
     public static String intToString = "";
     public static ArrayList<Block> blockArray = new ArrayList<Block>();
     public static String collisionResult = "";
-    Set<Integer> pressedKeys = new TreeSet<Integer>();
     public static int pressedRight, pressedLeft, pressedUp;
     
     public static void main(String[] args) {
@@ -78,8 +75,6 @@ public class Main {
         int lastPhysicsFrameMs = 0;
         int nextBlock = 0, randomBlockX = 0, temp = 0, pow = 0;
         int lavaTimer = 0;
-        //textSize[0] = spriteSize[0];
-        //textSize[1] = spriteSize[1];
         
         // Starting blocks
         for(int i = 1; i <= 3; i++) {
@@ -118,12 +113,6 @@ public class Main {
         	    if(blockArray.get(bA).isAlive()) { 
         	    	if(!blockArray.get(bA).checkRemoval()) { // Block is alive
         	    		blockArray.get(bA).update(gl);
-        	    		
-        	    		// Add block to playerGrid
-        	    		if(blockArray.get(bA).getOnGroundTimer() == 1) {
-        	    			myGrid.addToPlayerGrid(blockArray.get(bA).getX()/64);
-        	    			//System.out.println("added to playerGrid: " + blockArray.get(bA).getX()/64);
-        	    		}
         	    	}
         	    	else { // Block is below screen and needs to be removed
         	    		myGrid.remove(blockArray.get(bA).getX()/64);
@@ -134,14 +123,8 @@ public class Main {
         		    System.out.println("Remove me daddy");
         		    blockArray.remove(bA);
         	    }
-        	    
             }
             
-            /**
-            for(int i = 0; i < 10; i++) {
-            	System.out.println("Stack[" + i + "]: " + myGrid.getPlayerGrid(i));
-            }**/
-                
             // Add new block 
             if(nextBlock % 100 == 0) {
             	

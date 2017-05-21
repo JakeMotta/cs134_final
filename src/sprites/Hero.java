@@ -30,11 +30,7 @@ public class Hero extends Sprite implements Actor {
     private int imgCounter = 0;
     private int punchCounter = 0;
     private int jumpCounter = 0;
-    private int stack = 0;
-    private int stackLeft = 0;
-    private int stackRight = 0;
     private int blocksRemoved = 0;
-    private int fallDiff = 0;
     private int gravityInc = 20;
     Dummy dummy;
     
@@ -77,7 +73,6 @@ public class Hero extends Sprite implements Actor {
 	public void update(GL2 gl) {
 
 		dummy.update(gl);
-		checkBlocks();
 		sink();
 		checkCollision();
 		
@@ -144,24 +139,10 @@ public class Hero extends Sprite implements Actor {
 		vsp = Main.getBlockVSP();
 	}
 	
-	
 	public void sink() {
 		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 
 			moveY(vsp);	
 	}
-	
-	public void checkBlocks() {
-		stack = Main.myGrid.getPlayerGrid(getX()/64);
-		
-		if(getX() >= 64)
-			stackLeft = Main.myGrid.getPlayerGrid((getX()/64)-1);
-		
-		if(getX() < 576)
-			stackRight = Main.myGrid.getPlayerGrid((getX()/64)+1);
-		
-		blocksRemoved = Main.myGrid.blocksRemoved(getX()/64) * 64;
-	}
-	
 	
 	public void checkCollision() {			
 		dummy.setWidth(60);
