@@ -234,6 +234,7 @@ public class Main {
             intToString = String.valueOf(playerScore);
             drawText(gl, "SCORE:" + intToString, 10, 10, camera, spriteSize);
             
+            /**
             drawText(gl, "448", 10, 448, camera, spriteSize);
             drawText(gl, "512", 10, 512, camera, spriteSize);
             drawText(gl, "576", 10, 576, camera, spriteSize);
@@ -242,6 +243,7 @@ public class Main {
             drawText(gl, "768", 10, 768, camera, spriteSize);
             drawText(gl, "832", 10, 832, camera, spriteSize);
             drawText(gl, "896", 10, 896, camera, spriteSize);
+            **/
         }  
     }
     

@@ -38,8 +38,9 @@ public class Hero extends Sprite implements Actor {
     private int jumpCounter = 0;
     private int blocksRemoved = 0;
     private int gravityInc = 20;
-    public Dummy dummy;
-    public Dummy floorDummy;
+    public Dummy dummy; // Used for player collision and mining collision
+    public Dummy floorDummy; // Used for floor detection
+    public Dummy myDummy; // Used for knowing when a block is on-top of us
     
 	public Hero(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
@@ -78,8 +79,11 @@ public class Hero extends Sprite implements Actor {
 	    height = 64;
 	    keyDown = null;
 	    isGrounded = false;
+	    
+	    // Bunch of dummies
 	 	dummy = new Dummy(0,0,spriteSize,gl);
 	 	floorDummy = new Dummy(0,0,spriteSize,gl);
+	 	myDummy = new Dummy(0,0,spriteSize,gl);
 	 	
 	 	currentImage = walkDown[2];
 	}
@@ -93,9 +97,11 @@ public class Hero extends Sprite implements Actor {
 	public void update(GL2 gl) {
 
 		//dummy.update(gl);
+		myDummy.update(gl);
 		
 		sink();
 		checkCollision();
+		checkCenter();
 		checkMining();
 		
 	
@@ -126,10 +132,7 @@ public class Hero extends Sprite implements Actor {
 	    attacking = false;
 	    keyDown = null;
 	    isMining = false;
-	    
-	    System.out.println("Block Location: " + blockLocation);
-	    System.out.println("direction: " + direction);
-	    
+	    	    	    
 	    setImage(currentImage);
 
 	    draw(gl);
@@ -204,6 +207,20 @@ public class Hero extends Sprite implements Actor {
 		}
 	}
 	
+	public boolean checkCenter() {
+		myDummy.setWidth(32);
+		myDummy.setHeight(32);
+		myDummy.setX(getX()+16);
+		myDummy.setY(getY()+16);
+		
+		for(int i = 0; i < Main.blockArray.size(); i++)
+			if(Main.Dummy_Collision(myDummy, Main.blockArray.get(i))) {
+				System.out.println("Center HIT!");
+				return false;
+			}
+		return true;
+	}
+	
 	public boolean checkLeft() {
 		dummy.setWidth(58);
 		dummy.setHeight(58);
@@ -263,16 +280,8 @@ public class Hero extends Sprite implements Actor {
 	public void keyDown(String key) {
 		keyDown = key;
 		
-		// Direction keys
-		if((keyDown == "up" || keyDown == "down" || keyDown == "left" || keyDown == "right")) {
-			direction = keyDown;
-			shouldMove = true;
-		}
-		else
-			shouldMove = false;
-	
 		// If movement keys are pressed		
-		if(keyDown == "up" && canJump == true && checkAbove()) {
+		if(keyDown == "up" && canJump == true && checkAbove()  && checkCenter()) {
 			jumpCounter++;
 				
 			if(jumpCounter <= 1)
@@ -280,11 +289,11 @@ public class Hero extends Sprite implements Actor {
 					setY(getY()-64);				
 		}
 
-		if(keyDown == "left" && checkLeft())
+		if(keyDown == "left" && checkLeft()  && checkCenter())
 			if (getX() > 0)
 	    		moveX(-64);
 			
-		if(keyDown == "right" && checkRight()) 
+		if(keyDown == "right" && checkRight()  && checkCenter()) 
 			if(getX() < Main.worldWidth-getWidth())
 				moveX(64);	
 
@@ -301,6 +310,14 @@ public class Hero extends Sprite implements Actor {
 				getMiningImage(direction, mineCounter/fps);
 		} else
 			isMining = false;
+		
+		// Direction keys
+		if((keyDown == "up" || keyDown == "down" || keyDown == "left" || keyDown == "right")) {
+			direction = keyDown;
+			shouldMove = true;
+		}
+		else
+			shouldMove = false;
 	}
 	
 	public static void getMiningImage(String dir, int count) {

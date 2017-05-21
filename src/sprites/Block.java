@@ -43,10 +43,7 @@ public class Block extends Sprite {
 		
 		checkBelow();
 		checkVSP();
-		checkMined();
-		
-		System.out.println("HP: " + hp);
-		
+		checkMined();		
 		
 		setImage(Main.images.getBlockImage(hp));
 		draw(gl);
