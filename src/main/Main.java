@@ -37,6 +37,7 @@ public class Main {
     public static blockGrid myGrid;
     public static Lava lava;
     public static Font font;
+    public static Images images;
     
     public static int worldWidth;
     public static int worldHeight;
@@ -60,6 +61,7 @@ public class Main {
         long lastFrameNS;
         long curFrameNS = System.nanoTime();
         
+        images = new Images(spriteSize,gl);
         camera = new Camera(window.getWidth(),window.getHeight());
         hero = new Hero(512, 0, spriteSize, gl);
         background = new Background(spriteSize, gl);
@@ -69,6 +71,7 @@ public class Main {
         lava = new Lava(spriteSize, gl, 800);
         font = new Font(spriteSize, gl);
         pressedRight = pressedLeft = pressedUp = 0;
+        
         
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
@@ -239,9 +242,6 @@ public class Main {
             drawText(gl, "768", 10, 768, camera, spriteSize);
             drawText(gl, "832", 10, 832, camera, spriteSize);
             drawText(gl, "896", 10, 896, camera, spriteSize);
-            
-            //System.out.println("diff:     " + Main.getGameTimer() / Main.getGameSpeed());
-            //System.out.println("falldiff: " + blockVSP * (Main.getGameTimer() / Main.getGameSpeed()));
         }  
     }
     

@@ -5,20 +5,8 @@ import com.jogamp.opengl.GL2;
 import main.Main;
 
 public class Block extends Sprite {
-	
-	private static int blockImg;
-	private static int bd1;
-	private static int bd2;
-	private static int bd3;
-	private static int bd4;
-	private static int bd5;
-	private static int bd6;
-	private static int bd7;
-	private static int bd8;
-	private static int bd9;
-	private static int bd10;
-	
-	public static int currentImage;
+
+	public int currentImage;
 	
 	private boolean shouldFall = true;
 	
@@ -33,24 +21,12 @@ public class Block extends Sprite {
 
 	public Block(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
-
-		blockImg = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block1.tga", spriteSize);
-		bd1 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd1.tga", spriteSize);
-		bd2 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd2.tga", spriteSize);
-		bd3 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd3.tga", spriteSize);
-		bd4 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd4.tga", spriteSize);
-		bd5 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd5.tga", spriteSize);
-		bd6 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd6.tga", spriteSize);
-		bd7 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd7.tga", spriteSize);
-		bd8 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd8.tga", spriteSize);
-		bd9 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd9.tga", spriteSize);
-		bd10 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd10.tga", spriteSize);
 		
 		width = height = 64;
 		stack = Main.myGrid.getGrid(getX()/64);
 		blocksRemoved = Main.myGrid.blocksRemoved(getX()/64) * 64;
 		
-		currentImage = blockImg;
+		currentImage = Main.images.getBlockImage(hp);;
 	}
 	
 	public void update(GL2 gl) {
@@ -68,12 +44,11 @@ public class Block extends Sprite {
 		checkBelow();
 		checkVSP();
 		checkMined();
-		checkImage();
 		
 		System.out.println("HP: " + hp);
 		
 		
-		setImage(currentImage);
+		setImage(Main.images.getBlockImage(hp));
 		draw(gl);
 	}
 	
@@ -98,44 +73,7 @@ public class Block extends Sprite {
 			hp = 100;
 		}
 	}
-	
-	public void checkImage() {
-		switch (hp) {
-		case 100:
-			currentImage = blockImg;
-			break;
-		case 99:
-			currentImage = bd1;
-			break;
-		case 90:
-			currentImage = bd2;
-			break;
-		case 80:
-			currentImage = bd3;
-			break;
-		case 70:
-			currentImage = bd4;
-			break;
-		case 60:
-			currentImage = bd5;
-		case 50:
-			currentImage = bd6;
-			break;
-		case 40:
-			currentImage = bd7;
-			break;
-		case 30:
-			currentImage = bd8;
-			break;
-		case 20:
-			currentImage = bd9;
-			break;
-		case 10:
-			currentImage = bd10;
-			break;
-    	}
-	}
-	
+
 	public void checkVSP() {
 		vsp = Main.getBlockVSP();
 	}
