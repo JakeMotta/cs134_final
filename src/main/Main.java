@@ -19,6 +19,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.imageio.ImageIO;
 
@@ -42,11 +44,13 @@ public class Main {
     public static int worldHeight;
     public static int gameTimer = 0;
     public static int gameSpeed = 100;
-    public static int blockVSP = 4;
+    public static int blockVSP = 2;
     public static int playerScore = 0;
     public static String intToString = "";
     public static ArrayList<Block> blockArray = new ArrayList<Block>();
     public static String collisionResult = "";
+    Set<Integer> pressedKeys = new TreeSet<Integer>();
+    public static int pressedRight, pressedLeft, pressedUp;
     
     public static void main(String[] args) {
           
@@ -60,14 +64,15 @@ public class Main {
         long curFrameNS = System.nanoTime();
         
         camera = new Camera(window.getWidth(),window.getHeight());
-        hero = new Hero(200, 400, spriteSize, gl);
+        hero = new Hero(512, 447, spriteSize, gl);
         background = new Background(spriteSize, gl);
         worldWidth = background.getWorldWidth();
         worldHeight = background.getWorldHeight();
         myGrid = new blockGrid();
         lava = new Lava(spriteSize, gl, 832);
         font = new Font(spriteSize, gl);
-         
+        pressedRight = pressedLeft = pressedUp = 0;
+        
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
         int lastPhysicsFrameMs = 0;
@@ -101,28 +106,7 @@ public class Main {
                 shouldExit = true;
                 break;
             }
-                         
-            // Game logic goes here.
-            if (window.kbState[KeyEvent.VK_ESCAPE]) {
-                shouldExit = true;
-            }
-
-            if (window.kbState[KeyEvent.VK_UP]) {   
-            	hero.keyDown("up");
-	        }
-	
-	        if (window.kbState[KeyEvent.VK_DOWN]) {
-	        	hero.keyDown("down");
-	        }
-	
-	        if (window.kbState[KeyEvent.VK_LEFT]) {
-	        	hero.keyDown("left");
-	        }
-	        
-	        if (window.kbState[KeyEvent.VK_RIGHT]) {
-	        	hero.keyDown("right");
-	        }
-	         
+                                  
             window.gl.glClearColor(0, 0, 0, 1);
             window.gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
             
@@ -131,20 +115,32 @@ public class Main {
             
             for(int bA = 0; bA < blockArray.size(); bA++) {
             	
-        	    if(blockArray.get(bA).isAlive()) {
-        	    	if(!blockArray.get(bA).checkRemoval())
+        	    if(blockArray.get(bA).isAlive()) { 
+        	    	if(!blockArray.get(bA).checkRemoval()) { // Block is alive
         	    		blockArray.get(bA).update(gl);
-        	    	else {
+        	    		
+        	    		// Add block to playerGrid
+        	    		if(blockArray.get(bA).getOnGroundTimer() == 1) {
+        	    			myGrid.addToPlayerGrid(blockArray.get(bA).getX()/64);
+        	    			//System.out.println("added to playerGrid: " + blockArray.get(bA).getX()/64);
+        	    		}
+        	    	}
+        	    	else { // Block is below screen and needs to be removed
         	    		myGrid.remove(blockArray.get(bA).getX()/64);
         	    		blockArray.remove(bA);
         	    	}
         	    }
-        	    else {
+        	    else { // Block is dead (from player)
         		    System.out.println("Remove me daddy");
         		    blockArray.remove(bA);
         	    }
         	    
             }
+            
+            /**
+            for(int i = 0; i < 10; i++) {
+            	System.out.println("Stack[" + i + "]: " + myGrid.getPlayerGrid(i));
+            }**/
                 
             // Add new block 
             if(nextBlock % 100 == 0) {
@@ -158,8 +154,7 @@ public class Main {
             	if(blockHistory[0] == randomBlockX)
 	            	while(randomBlockX == blockHistory[0])
 	            		randomBlockX = getRandom(10) * 64;
-            	
-            	
+
             	// Add background alert
             	background.addAlert(randomBlockX/64);
 
@@ -169,8 +164,8 @@ public class Main {
 	            
 	            temp = nextBlock + 25;
 	            
-	            // Update grid with column block is in
-	            myGrid.add(randomBlockX/64);      
+	            // Add block to grid
+	    		myGrid.addToGrid(randomBlockX/64);
             }
             
             if(nextBlock >= temp) {
@@ -179,7 +174,7 @@ public class Main {
             }
                            
             hero.update(gl);
-            //lava.update(gl, lavaTimer);
+            lava.update(gl, lavaTimer);
              
             /**
             // Physics update
@@ -193,6 +188,39 @@ public class Main {
                 lastPhysicsFrameMs += physicsDeltaMs;
             } while (lastPhysicsFrameMs + physicsDeltaMs < deltaTimeMS );
             **/
+            
+            // Game logic goes here.
+            if (window.kbState[KeyEvent.VK_ESCAPE]) {
+                shouldExit = true;
+            }
+
+            if (window.kbState[KeyEvent.VK_UP]) {   
+            	pressedUp++;
+            	
+            	if(pressedUp == 1)
+            		hero.keyDown("up");
+	        } else
+	        	pressedUp = 0;
+	
+	        if (window.kbState[KeyEvent.VK_DOWN]) {
+	        	hero.keyDown("down");
+	        }
+	
+	        if (window.kbState[KeyEvent.VK_LEFT]) {
+	        	pressedLeft++;
+	        	
+	        	if(pressedLeft == 1)
+	        		hero.keyDown("left");
+	        } else
+	        	pressedLeft = 0;
+	        
+	        if (window.kbState[KeyEvent.VK_RIGHT]) {
+	        	pressedRight++;
+	        	
+	        	if(pressedRight == 1)
+	        		hero.keyDown("right");
+	        } else
+	        	pressedRight = 0;
 
             nextBlock++;
             gameTimer = nextBlock;
@@ -324,6 +352,27 @@ public class Main {
 	     
 	     return true;
     }
+    
+    public static boolean Dummy_Collision(Dummy a, Sprite b) {
+	     // box1 to the right
+	     if (a.getX() > b.getX() + b.getWidth()) {
+	     return false;
+	     }
+	     // box1 to the left
+	     if (a.getX() + a.getWidth() < b.getX()) {
+	     return false;
+	     }
+	     // box1 below
+	     if (a.getY() > b.getY() + b.getHeight()) {
+	     return false;
+	     }
+	     // box1 above
+	     if (a.getY() + a.getHeight() < b.getY()) {
+	     return false;
+	     }
+	     
+	     return true;
+   }
     
     public static void DrawSprite(GL2 gl, int tex, int x, int y, int w, int h, Camera camera) {
         glDrawSprite(gl, tex, x - camera.getX(), y - camera.getY(), w, h);

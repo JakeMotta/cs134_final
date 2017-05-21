@@ -14,7 +14,7 @@ public class Sprite {
 	
 	protected int x, y, width, height, image;
 	protected String direction, shape;
-	protected long speed, vsp, hsp, gravity;
+	protected int speed, vsp, hsp, gravity;
 	protected boolean isAlive, shouldMove, isGrounded, canMoveRight, canMoveLeft, canJump;
 	
 	protected int gravityTimer = 0;
@@ -23,7 +23,7 @@ public class Sprite {
 		y = myY;
 		width = spriteSize[0];
 		height = spriteSize[1];
-		gravity = 1;
+		gravity = 64;
 		isAlive = true;
 		shouldMove = canMoveRight = canMoveLeft = canJump = false;
 	}
@@ -32,9 +32,9 @@ public class Sprite {
 	public void setY(int b) { y = b; }
 	public void setImage(int i) { image = i; }
 	
-	public void setSpeed(long a) { speed = a; }
-	public void setVsp(long a) { vsp = a; }
-	public void setHsp(long b) { hsp = b; }
+	public void setSpeed(int a) { speed = a; }
+	public void setVsp(int a) { vsp = a; }
+	public void setHsp(int b) { hsp = b; }
 	public long getVsp() { return vsp; }
 	public long getHsp() { return hsp; }
 	public long getSpeed() { return speed; }

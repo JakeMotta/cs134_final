@@ -9,28 +9,33 @@ public class Hero extends Sprite implements Actor {
 
 	public static int currentImage;
 	
-	public static int walkLeft[] = new int[3];
-	public static int walkRight[] = new int[3];
-	public static int walkUp[] = new int[3];
-	public static int walkDown[] = new int[3];
+	private static int walkLeft[] = new int[3];
+	private static int walkRight[] = new int[3];
+	private static int walkUp[] = new int[3];
+	private static int walkDown[] = new int[3];
     
     // Character Specifics
     private int fps = 6;
     
     // Strings
-	String shape = "rect";
-	String keyDown = null;
+    private String shape = "rect";
+    private String keyDown = null;
 	
 	// Booleans
-    boolean attacking = false;
+    private boolean attacking = false;
     
     // Counters
-    int walkCounter = 0;
-    int idleCounter = 0;
-    int imgCounter = 0;
-    public int punchCounter = 0;
-    public int jumpCounter = 0;
-    public int stack = 0;
+    private int walkCounter = 0;
+    private int idleCounter = 0;
+    private int imgCounter = 0;
+    private int punchCounter = 0;
+    private int jumpCounter = 0;
+    private int stack = 0;
+    private int stackLeft = 0;
+    private int stackRight = 0;
+    private int blocksRemoved = 0;
+    private int fallDiff = 0;
+    Dummy dummy;
     
 	public Hero(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
@@ -51,34 +56,49 @@ public class Hero extends Sprite implements Actor {
 		walkDown[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd2.tga", spriteSize);
 		walkDown[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd3.tga", spriteSize);
 		
-	    vsp = hsp = speed = 3;
+	    vsp = hsp = speed = Main.getBlockVSP();
 		direction = "right";
 	    width = 64;
 	    height = 64;
 	    keyDown = null;
 	    isGrounded = false;
-	    //stack = Main.myGrid.getGrid(3);
-	    //System.out.println(stack);
-	    
-		currentImage = walkDown[2];
+	 	dummy = new Dummy(0,0,spriteSize,gl);
+	 	
+		setImage(walkDown[2]);
 	}
 	
 	// Set hero's speed
 	public void setSpeed(long bgSpeed){
-		speed = bgSpeed;
+		speed = vsp;
 	}
 
 	@Override
 	public void update(GL2 gl) {
-		
-		stack = Main.myGrid.getGrid(getX()/64);
+
+		dummy.update(gl);
+		checkBlocks();
+		sink();
 		checkCollision();
 		
-		
+	
 		if(isGrounded == false)
 			gravity();		
 		
 		if (shouldMove) {
+			
+			if(direction == "left")
+				setImage(walkLeft[2]);
+			
+			if(direction == "right")
+				setImage(walkRight[2]);
+			
+			if(direction == "up")
+				setImage(walkUp[2]);
+			
+			if(direction == "down")
+				setImage(walkDown[2]);
+		
+			/**
 			// Play walking animation
 		    if (walkCounter >= (fps*walkRight.length)-2)
 		        walkCounter = -1;
@@ -87,7 +107,7 @@ public class Hero extends Sprite implements Actor {
 		
 		    if(walkCounter % fps == 0)
 		    	getWalkingImage(direction, walkCounter/fps);
-		} /**else {
+		} else {
 			if(!attacking) {
 				walkCounter = -1;
 				
@@ -102,116 +122,128 @@ public class Hero extends Sprite implements Actor {
 					 
 				//if(idleCounter % fps == 0)
 			    	//getIdleImage(direction, idleCounter/fps);
-			}
-		}**/
+			}**/
+		}
 	        
-	    setImage(currentImage);
+	    //setImage(currentImage);
 	    
 	    // Reset booleans
-	    shouldMove = false;
+	    shouldMove = canMoveLeft = canMoveRight = false;
 	    attacking = false;
 	    keyDown = null;
 
 	    draw(gl);
 	}
 	
+	public void checkVSP() {
+		vsp = Main.getBlockVSP();
+	}
+	
+	
+	public void sink() {
+		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 
+			moveY(vsp);	
+	}
+	
+	public void checkBlocks() {
+		stack = Main.myGrid.getPlayerGrid(getX()/64);
+		
+		if(getX() >= 64)
+			stackLeft = Main.myGrid.getPlayerGrid((getX()/64)-1);
+		
+		if(getX() < 576)
+			stackRight = Main.myGrid.getPlayerGrid((getX()/64)+1);
+		
+		blocksRemoved = Main.myGrid.blocksRemoved(getX()/64) * 64;
+	}
+	
 	
 	public void checkCollision() {	
 		
-		if(getY() >= Main.worldHeight - (stack * 64) - height)
+		fallDiff = vsp * (Main.getGameTimer() / Main.getGameSpeed());
+
+		// Player is on ground
+		if(getY() >= Main.worldHeight - (stack * 64) - 64 - blocksRemoved) {
 			isGrounded = true;
-		else
+			canJump = true;
+			gravityTimer = 0;
+		}
+		else { // Player not on ground
 			isGrounded = false;
-		
-		//System.out.println("Grounded: " + isGrounded);
-		//System.out.println(stack);
+			canJump = false;
+			jumpCounter = 0;
+		}
 		
 		/**
-		for(int i = 0; i < Main.blockArray.size(); i++) {			
-			if(Main.AABB_Collision(this, Main.blockArray.get(i))) {
-				
-				if(keyDown == "left") {
-					canMoveLeft = false;
-				//	System.out.println("Left collision");
-				} else
-					canMoveLeft = true;
-				
-				if(keyDown == "right") {
-					canMoveRight = false;
-				//	System.out.println("right collision");
-				} else
-					canMoveRight = true;
-				
-				//if(keyDown == "up") {
-				//	System.out.println("up collision");
-				//} else
-				
-				
-				//if(keyDown == null)
-					//System.out.println("standstill collision");
-			} 
-				
+		dummy.setX(getX());
+		dummy.setY(getY()+5);
 		
-		}
-		System.out.println("Grounded: " + isGrounded);
-        /**
-        	// Offset resolution
-        	if(bottomOffsetTimer == 0)
-        		bottomBG = getY()+bottomOffset;
-        	bottomOffsetTimer++;
-        	
-        	// What happens when the hero is on the ground
-        	if(getY() >= bottomBG) {
-        		isGrounded = true;
-        		gravityTimer = 0;
-        		gravity = 1; // reset gravity back to 1
-        		canJump = true;
-        	}
-        } else { // when hero is not on the ground
-        	bottomOffsetTimer = 0;
-        	isGrounded = false;
-        	gravityTimer++;
-        	canJump = false;
-        }
-        
-        // Collidable tile to the right
-        if(Main.background.levelCollision[sY()][sX()+1] != 0) {
-        	canMoveRight = false;
-        	System.out.println("collided right!");
-        } else { 
-        	canMoveRight = true;
-        }
-        
-     // Collidable tile to the left
-        if(Main.background.levelCollision[sY()][sX()] != 0) {
-        	canMoveLeft = false;
-        	System.out.println("collided left!");
-        } else { 
-        	canMoveLeft = true;
-        }
-
-        /**
-        // Collidable tile to the left
-        if(Main.background.levelCollision[sY()][sX()-1] != 0) {
-        	
-        	// Offset resolution
-        	if(leftOffsetTimer == 0)
-        		leftBG = getX()-leftOffset;
-        	leftOffsetTimer++;
-        	
-        	// What happens the block is to the left
-        	if(getX() <= leftBG) {
-        		canMoveLeft = false;
-        	}
-        } else { 
-        	canMoveLeft = true;
-        	leftOffsetTimer = 0;
-        }**/
-        
+		for(int i = 0; i < Main.blockArray.size(); i++) {		
+			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
+				isGrounded = true;
+				canJump = true;
+				gravityTimer = 0;
+			} else {
+				isGrounded = false;
+				canJump = false;
+				jumpCounter = 0;
+			}
+			System.out.println("can jump: " + isGrounded);
+		}**/
 	}
 	
 	public void gravity() {
-		moveY(2);
+		gravityTimer++;
+		
+		if(gravityTimer % 25 == 0) {
+			moveY(64);
+			gravityTimer = 0;
+		}
+	}
+	
+	public boolean checkLeft() {
+		dummy.setWidth(64);
+		dummy.setHeight(64);
+		dummy.setX(getX()-width+5);
+		dummy.setY(getY()-5);
+		
+		for(int i = 0; i < Main.blockArray.size(); i++) {		
+			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
+				System.out.println("coliision left!");
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean checkRight() {
+		dummy.setWidth(64);
+		dummy.setHeight(64);
+		dummy.setX(getX()+width-5);
+		dummy.setY(getY()-5);
+		
+		for(int i = 0; i < Main.blockArray.size(); i++) {		
+			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
+				System.out.println("coliision right!");
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean checkAbove() {
+		dummy.setWidth(32);
+		dummy.setHeight(68);
+		dummy.setX(getX()+16);
+		dummy.setY(getY()-height);
+		
+		for(int i = 0; i < Main.blockArray.size(); i++) {		
+			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
+				System.out.println("coliision above!");
+				return false;
+			}
+		}
+		return true;
 	}
 		
 	public void keyDown(String key) {
@@ -228,29 +260,26 @@ public class Hero extends Sprite implements Actor {
 			shouldMove = false;
 	
 		// If movement keys are pressed		
-			if(keyDown == "up" && canJump == true) {
-				jumpCounter++;
+		if(keyDown == "up" && canJump == true && checkAbove()) {
+			jumpCounter++;
+			//System.out.println("jumpCounter: " + jumpCounter);
 				
-				if(jumpCounter <= 1)
-					if(getY() > 0)
-						setY(getY()-64);				
-			} 
-
-			if(keyDown == "left")
-				if (getX() > 0)
-	    			moveX(-hsp);
-			
-			if(keyDown == "right") 
-				if(getX() < Main.worldWidth-getWidth())
-					moveX(hsp);	
-			
-			if(keyDown == "up") 
+			if(jumpCounter <= 1)
 				if(getY() > 0)
-					moveY(-vsp);	
+					setY(getY()-64);				
+		}
+
+		if(keyDown == "left" && checkLeft())
+			if (getX() > 0)
+	    		moveX(-64);
 			
-			if(keyDown == "down") 
-				if(getY() < Main.worldHeight-getHeight())
-					moveY(vsp);	
+		if(keyDown == "right" && checkRight()) 
+			if(getX() < Main.worldWidth-getWidth())
+				moveX(64);	
+
+		//if(keyDown == "down") 
+		//	if(getY() < Main.worldHeight-getHeight())
+		//		moveY(vsp);	
 	}
 	
 	public static void getWalkingImage(String dir, int count) {
@@ -261,12 +290,12 @@ public class Hero extends Sprite implements Actor {
 		case "right":
 			currentImage = walkRight[count];
 			break;
-		case "up":
-			currentImage = walkUp[count];
-			break;
-		case "down":
-			currentImage = walkDown[count];
-			break;
     	}
-    }    
+    }
+
+	@Override
+	public String getShape() {
+		// TODO Auto-generated method stub
+		return null;
+	}    
 }

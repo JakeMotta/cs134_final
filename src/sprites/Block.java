@@ -15,6 +15,7 @@ public class Block extends Sprite {
 	private int vsp = Main.getBlockVSP();
 	private boolean remove = false;
 	private int blocksRemoved = 0;
+	private int onGroundTimer = 0;
 
 	public Block(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
@@ -34,14 +35,10 @@ public class Block extends Sprite {
 		
 		if(shouldFall)
 			fall();
-		
-		/**
-		if(!shouldFall)
-			System.out.println(getY());
-		**/
-		
-		if(!shouldFall)
+		else {
 			sink();
+			onGroundTimer++;
+		}
 		
 		checkBelow();
 		checkVSP();
@@ -87,6 +84,10 @@ public class Block extends Sprite {
 	
 	public int getHP() {
 		return hp;
+	}
+	
+	public int getOnGroundTimer() {
+		return onGroundTimer;
 	}
 
 }
