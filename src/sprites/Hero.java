@@ -35,6 +35,7 @@ public class Hero extends Sprite implements Actor {
     private int stackRight = 0;
     private int blocksRemoved = 0;
     private int fallDiff = 0;
+    private int gravityInc = 20;
     Dummy dummy;
     
 	public Hero(int myX, int myY, int[] spriteSize, GL2 gl) {
@@ -83,6 +84,10 @@ public class Hero extends Sprite implements Actor {
 	
 		if(isGrounded == false)
 			gravity();		
+		else {
+			gravityInc = 20;
+			gravityTimer = 0;
+		}
 		
 		if (shouldMove) {
 			
@@ -158,46 +163,34 @@ public class Hero extends Sprite implements Actor {
 	}
 	
 	
-	public void checkCollision() {	
-		
-		fallDiff = vsp * (Main.getGameTimer() / Main.getGameSpeed());
-
-		// Player is on ground
-		if(getY() >= Main.worldHeight - (stack * 64) - 64 - blocksRemoved) {
-			isGrounded = true;
-			canJump = true;
-			gravityTimer = 0;
-		}
-		else { // Player not on ground
-			isGrounded = false;
-			canJump = false;
-			jumpCounter = 0;
-		}
-		
-		/**
-		dummy.setX(getX());
-		dummy.setY(getY()+5);
+	public void checkCollision() {			
+		dummy.setWidth(60);
+		dummy.setHeight(60);
+		dummy.setX(getX()+2);
+		dummy.setY(getY()+height-2);
 		
 		for(int i = 0; i < Main.blockArray.size(); i++) {		
 			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
 				isGrounded = true;
 				canJump = true;
-				gravityTimer = 0;
+				break;
 			} else {
 				isGrounded = false;
 				canJump = false;
 				jumpCounter = 0;
 			}
-			System.out.println("can jump: " + isGrounded);
-		}**/
+		}
 	}
 	
 	public void gravity() {
 		gravityTimer++;
 		
-		if(gravityTimer % 25 == 0) {
+		if(gravityTimer % gravityInc == 0) {
 			moveY(64);
 			gravityTimer = 0;
+			
+			if(gravityInc > 6)
+				gravityInc -= 4;
 		}
 	}
 	

@@ -64,12 +64,12 @@ public class Main {
         long curFrameNS = System.nanoTime();
         
         camera = new Camera(window.getWidth(),window.getHeight());
-        hero = new Hero(512, 447, spriteSize, gl);
+        hero = new Hero(512, 0, spriteSize, gl);
         background = new Background(spriteSize, gl);
         worldWidth = background.getWorldWidth();
         worldHeight = background.getWorldHeight();
         myGrid = new blockGrid();
-        lava = new Lava(spriteSize, gl, 832);
+        lava = new Lava(spriteSize, gl, 800);
         font = new Font(spriteSize, gl);
         pressedRight = pressedLeft = pressedUp = 0;
         

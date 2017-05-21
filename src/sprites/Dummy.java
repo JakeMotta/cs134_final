@@ -36,6 +36,6 @@ public class Dummy extends Sprite {
 	
 	public void update(GL2 gl) {
 		setImage(dummyImg);
-		draw(gl);
+		//draw(gl);
 	}
 }

@@ -40,23 +40,20 @@ public class Lava {
 		lavaTop[11] = Main.glTexImageTGAFile(gl, "Sprites/Lava/lava-top12.tga", size);
 		lavaTop[12] = Main.glTexImageTGAFile(gl, "Sprites/Lava/lava-top13.tga", size);
 
-		width = height = 64;
+		width = height = 128;
 		myY = setY;
 		
 		lavaGrid = new int[][] {
-			{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},	
-			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	
-			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},	
+			{1, 1, 1, 1, 1},	
+			{0, 0, 0, 0, 0},	
+			{0, 0, 0, 0, 0},	
 		};
 	}
 	
 	public void update(GL2 gl, int timer) {
 		
-		startXTile = (int) Math.abs(Math.floor((Main.camera.getX())/width));
-		startYTile = (int) Math.abs(Math.floor((Main.camera.getY())/height));
-		
 		for (int i = 0; i < 3; i++) {
-    		for(int j = 0; j < 10; j++) {
+    		for(int j = 0; j < 5; j++) {
 
     			switch(lavaGrid[i][j]) {
         			case 0:
