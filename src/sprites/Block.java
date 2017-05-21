@@ -18,19 +18,36 @@ public class Block extends Sprite {
 	private int blocksRemoved = 0;
 	private int onGroundTimer = 0;
 	private int miningTimer = 0;
+	private int type = 0;
+	private int myID = 0;
+	public Dummy floorDummy; // Used for floor detection
 
-	public Block(int myX, int myY, int[] spriteSize, GL2 gl) {
+	public Block(int myX, int myY, int[] spriteSize, int num, int id, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
 		
 		width = height = 64;
 		stack = Main.myGrid.getGrid(getX()/64);
 		blocksRemoved = Main.myGrid.blocksRemoved(getX()/64) * 64;
+		type = num;
+		myID = id;
 		
-		currentImage = Main.images.getBlockImage(hp);;
+		switch(type) {
+			case 0: // Regular block
+				currentImage = Main.images.getBlockImage(hp);;
+				break;
+			case 1: // Dark block
+				floorDummy = new Dummy(0,0,spriteSize,gl);
+				currentImage = Main.images.getDarkBlockImage(hp);
+				break;
+			case 2: // Fruit
+				floorDummy = new Dummy(0,0,spriteSize,gl);
+				currentImage = Main.images.apple;
+				break;
+		}
+		
 	}
 	
 	public void update(GL2 gl) {
-		
 		if(hp <= 0)
 			isAlive = false;
 		
@@ -44,8 +61,21 @@ public class Block extends Sprite {
 		checkBelow();
 		checkVSP();
 		checkMined();		
+		 
+		switch(type) {
+			case 0: // Regular block
+				setImage(Main.images.getBlockImage(hp));
+				break;
+			case 1: // Dark block
+				//floorDummy.update(gl);
+				setImage(Main.images.getDarkBlockImage(hp));
+				break;
+			case 2: // Fruit
+				//floorDummy.update(gl);
+				setImage(Main.images.apple);
+				break;
+		}
 		
-		setImage(Main.images.getBlockImage(hp));
 		draw(gl);
 	}
 	
@@ -83,6 +113,14 @@ public class Block extends Sprite {
 	public void fall() {
 		moveY(vsp);
 	}
+	
+	public int getType() {
+		return type;
+	}
+	
+	public int getID() {
+		return myID;
+	}
 
 	public void checkBelow() {
 		// If block is at the bottom of the screen
@@ -91,11 +129,29 @@ public class Block extends Sprite {
 				
 		fallDiff = vsp * (Main.getGameTimer() / Main.getGameSpeed());
 
-		if(getY() >= Main.worldHeight - (stack * 64) - 64 + fallDiff - blocksRemoved)
-			shouldFall = false;	
+		if(type == 0) {
+			if(getY() >= Main.worldHeight - (stack * 64) - 64 + fallDiff - blocksRemoved)
+				shouldFall = false;	
+		} else {
+			
+			floorDummy.setWidth(58);
+			floorDummy.setHeight(60);
+			floorDummy.setX(getX()+4);
+			floorDummy.setY(getY()+4);
+			
+			for(int i = 0; i < Main.blockArray.size(); i++) {		
+				if(Main.Dummy_Collision(floorDummy, Main.blockArray.get(i))) {
+					if(Main.blockArray.get(i).getID() != myID) {
+						shouldFall = false;
+						break;
+					} else
+						shouldFall = true;
+				}
+			}
+		}
 		
 		if(getY() >= 960)
-			remove = true;
+			remove = true;	
 	}
 	
 	public boolean checkRemoval() {

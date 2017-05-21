@@ -76,14 +76,14 @@ public class Main {
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
         int lastPhysicsFrameMs = 0;
-        int nextBlock = 0, randomBlockX = 0, temp = 0, pow = 0;
+        int nextBlock = 0, randomBlockX = 0, randomBlockType = 0, temp = 0, pow = 0;
         int lavaTimer = 0;
         
         // Starting blocks
         for(int i = 1; i <= 3; i++) {
         	for(int j = 0; j < 10; j++) {
 		        Block block;
-		    	block = new Block(j*64, worldHeight-(64*i+blockVSP), spriteSize, gl);
+		    	block = new Block(j*64, worldHeight-(64*i+blockVSP), spriteSize, 0, (i+j)*7, gl);
 		    	blockArray.add(block);    	
         	}
         }
@@ -135,6 +135,8 @@ public class Main {
 
             	// Get random X position for block
             	randomBlockX = getRandom(10) * 64;
+            	randomBlockType = getRandom(100);
+            	int blockID = (nextBlock/10);
             	
             	// If two blocks in a row
             	if(blockHistory[0] == randomBlockX)
@@ -145,7 +147,14 @@ public class Main {
             	background.addAlert(randomBlockX/64);
 
             	Block block;
-            	block = new Block(randomBlockX, -128, spriteSize, gl); 
+            	
+            	if(randomBlockType < 75) // Block will be regular
+            		block = new Block(randomBlockX, -128, spriteSize, 0, blockID, gl); 
+            	else if(randomBlockType >= 75 && randomBlockType < 97) // Block will be a dark block
+            		block = new Block(randomBlockX, -128, spriteSize, 1, blockID, gl); 
+            	else // Block will be a fruit
+            		block = new Block(randomBlockX, -128, spriteSize, 2, blockID, gl); 
+            	System.out.println(randomBlockType);
 	            blockArray.add(block);    	
 	            
 	            temp = nextBlock + 25;
@@ -211,6 +220,11 @@ public class Main {
 	        if (window.kbState[KeyEvent.VK_Z]) {
 	        	hero.keyDown("z");
 	        }
+	        
+	        if (window.kbState[KeyEvent.VK_CONTROL]) {
+	        	hero.ctrlKeyDown(true);
+	        } else
+	        	hero.ctrlKeyDown(false);
 
             nextBlock++;
             gameTimer = nextBlock;

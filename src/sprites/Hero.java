@@ -30,6 +30,7 @@ public class Hero extends Sprite implements Actor {
 	// Booleans
     private boolean attacking = false;
     private boolean isMining = false;
+    private boolean ctrlDown = false;
     
     // Counters
     private int walkCounter = 0;
@@ -97,7 +98,7 @@ public class Hero extends Sprite implements Actor {
 	public void update(GL2 gl) {
 
 		//dummy.update(gl);
-		myDummy.update(gl);
+		//myDummy.update(gl);
 		
 		sink();
 		checkCollision();
@@ -132,7 +133,7 @@ public class Hero extends Sprite implements Actor {
 	    attacking = false;
 	    keyDown = null;
 	    isMining = false;
-	    	    	    
+	    	    	    	    
 	    setImage(currentImage);
 
 	    draw(gl);
@@ -276,26 +277,48 @@ public class Hero extends Sprite implements Actor {
 			}
 		return true;
 	}
+	
+	public void ctrlKeyDown(boolean isDown) {
+		ctrlDown = isDown;
+	}
 		
 	public void keyDown(String key) {
 		keyDown = key;
 		
-		// If movement keys are pressed		
-		if(keyDown == "up" && canJump == true && checkAbove()  && checkCenter()) {
-			jumpCounter++;
-				
-			if(jumpCounter <= 1)
-				if(getY() > 0)
-					setY(getY()-64);				
+		// Direction keys
+		if((keyDown == "up" || keyDown == "down" || keyDown == "left" || keyDown == "right")) {
+			direction = keyDown;
+			shouldMove = true;
 		}
-
-		if(keyDown == "left" && checkLeft()  && checkCenter())
-			if (getX() > 0)
-	    		moveX(-64);
+		else
+			shouldMove = false;
+		
+		if(ctrlDown) { // Used to look around, rather than move
+			if(keyDown == "left")
+				direction = "left";	
+			else if(keyDown == "right")
+				direction = "right";				
+			else if(keyDown == "up") 
+				direction = "up";	
+			else
+				direction = "down";
+		} else { // Player to move instead
+			if(keyDown == "up" && canJump == true && checkAbove()  && checkCenter()) {
+				jumpCounter++;
+					
+				if(jumpCounter <= 1)
+					if(getY() > 0)
+						setY(getY()-64);				
+			}
 			
-		if(keyDown == "right" && checkRight()  && checkCenter()) 
-			if(getX() < Main.worldWidth-getWidth())
-				moveX(64);	
+			if(keyDown == "left" && checkLeft()  && checkCenter())
+				if (getX() > 0)
+		    		moveX(-64);
+				
+			if(keyDown == "right" && checkRight()  && checkCenter()) 
+				if(getX() < Main.worldWidth-getWidth())
+					moveX(64);	
+		}
 
 		if(keyDown == "z") {
 			isMining = true;
@@ -311,13 +334,7 @@ public class Hero extends Sprite implements Actor {
 		} else
 			isMining = false;
 		
-		// Direction keys
-		if((keyDown == "up" || keyDown == "down" || keyDown == "left" || keyDown == "right")) {
-			direction = keyDown;
-			shouldMove = true;
-		}
-		else
-			shouldMove = false;
+		
 	}
 	
 	public static void getMiningImage(String dir, int count) {
