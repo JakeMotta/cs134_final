@@ -29,22 +29,17 @@ public class Hero extends Sprite implements Actor {
     private GL2 myGL;
     
     // Strings
-    private String shape = "rect";
     private String keyDown = null;
     private String blockLocation = "down";
 	
 	// Booleans
-    private boolean attacking = false;
     private boolean isMining = false;
     private boolean ctrlDown = false;
     private boolean inventoryFull = false;
     
     // Counters
-    private int walkCounter = 0;
-    private int imgCounter = 0;
     private int mineCounter = 0;
     private int jumpCounter = 0;
-    private int blocksRemoved = 0;
     private int textTimer = 0;
     private int gravityInc = 20;
     public Dummy dummy; // Used for player collision and mining collision
@@ -140,11 +135,9 @@ public class Hero extends Sprite implements Actor {
 	    
 	    // Reset booleans
 	    shouldMove = canMoveLeft = canMoveRight = false;
-	    attacking = false;
 	    keyDown = null;
 	    isMining = false;
     	    	    
-	    System.out.println("inventory: " + inventory[0] + ", " + inventory[1] + ", " + inventory[2]);
 	    setImage(currentImage);
 
 	    draw(gl);
@@ -389,8 +382,16 @@ public class Hero extends Sprite implements Actor {
 						Main.blockArray.add(block);
 						inventory[i] = -1;
 					}
-	
 					
+					if(direction == "down" && checkBelow()) {
+						if(inventory[i] == 0)
+							block = new Block(getX(), getY()+height-4, defaultSize, 0, rand, myGL); 
+						else
+							block = new Block(getX(), getY()+height-4, defaultSize, 1, rand, myGL);
+						
+						Main.blockArray.add(block);
+						inventory[i] = -1;
+					}
 				}
 			}
 		}	

@@ -7,7 +7,6 @@ import Camera.Camera;
 import Camera.Window;
 import background.Background;
 import background.Lava;
-import background.blockGrid;
 import sprites.*;
 import font.Font;
 
@@ -34,7 +33,6 @@ public class Main {
     public static Camera camera;
     public static Hero hero;
     public static Background background;
-    public static blockGrid myGrid;
     public static Lava lava;
     public static Font font;
     public static Images images;
@@ -67,7 +65,6 @@ public class Main {
         background = new Background(spriteSize, gl);
         worldWidth = background.getWorldWidth();
         worldHeight = background.getWorldHeight();
-        myGrid = new blockGrid();
         lava = new Lava(spriteSize, gl, 800);
         font = new Font(spriteSize, gl);
         pressedRight = pressedLeft = pressedUp = pressedSpace = 0;
@@ -118,7 +115,6 @@ public class Main {
         	    		blockArray.get(bA).update(gl);
         	    	}
         	    	else { // Block is below screen and needs to be removed
-        	    		myGrid.remove(blockArray.get(bA).getX()/64);
         	    		blockArray.remove(bA);
         	    	}
         	    }
@@ -130,17 +126,10 @@ public class Main {
             // Add new block 
             if(nextBlock % 100 == 0) {
             	
-            	int[] blockHistory = myGrid.getHistory();
-
             	// Get random X position for block
             	randomBlockX = getRandom(10) * 64;
             	randomBlockType = getRandom(100);
             	int blockID = (nextBlock/10);
-            	
-            	// If two blocks in a row
-            	if(blockHistory[0] == randomBlockX)
-	            	while(randomBlockX == blockHistory[0])
-	            		randomBlockX = getRandom(10) * 64;
 
             	// Add background alert
             	background.addAlert(randomBlockX/64);
@@ -157,9 +146,6 @@ public class Main {
             	blockArray.add(block);    	
 	            
 	            temp = nextBlock + 25;
-	            
-	            // Add block to grid
-	    		myGrid.addToGrid(randomBlockX/64);
             }
             
             if(nextBlock >= temp) {

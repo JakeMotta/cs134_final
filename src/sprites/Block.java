@@ -25,7 +25,6 @@ public class Block extends Sprite {
 		super(myX, myY, spriteSize, gl);
 		
 		width = height = 64;
-		stack = Main.myGrid.getGrid(getX()/64);
 		type = num;
 		myID = id;
 		
@@ -41,12 +40,6 @@ public class Block extends Sprite {
 			case 2: // Fruit
 				floorDummy = new Dummy(0,0,spriteSize,gl);
 				currentImage = Main.images.apple;
-				break;
-			case 3: // Block icon
-				currentImage = Main.images.blockImg_icon;
-				break;
-			case 4: // Dark block icon
-				currentImage = Main.images.blockImg2_icon;
 				break;
 		}
 		
@@ -81,12 +74,6 @@ public class Block extends Sprite {
 			case 2: // Fruit
 				//floorDummy.update(gl);
 				setImage(Main.images.apple);
-				break;
-			case 3: // Block icon
-				setImage(Main.images.blockImg_icon);
-				break;
-			case 4: // Dark block icon
-				setImage(Main.images.blockImg2_icon);
 				break;
 		}
 		
