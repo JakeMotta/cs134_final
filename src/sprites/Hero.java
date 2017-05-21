@@ -92,7 +92,7 @@ public class Hero extends Sprite implements Actor {
 	@Override
 	public void update(GL2 gl) {
 
-		dummy.update(gl);
+		//dummy.update(gl);
 		
 		sink();
 		checkCollision();
