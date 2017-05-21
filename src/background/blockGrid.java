@@ -23,6 +23,11 @@ public class blockGrid {
 		history[0] = column;	
 	}
 	
+	public void addManuallyToGrid(int column, int num) {
+		grid[column] += num;
+
+	}
+	
 	public int[] getHistory() {
 		return history;
 	}

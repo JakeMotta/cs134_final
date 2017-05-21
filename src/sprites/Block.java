@@ -12,14 +12,13 @@ public class Block extends Sprite {
 	
 	private int hp = 100;
 	private int stack = 0;
-	private int fallDiff = 0;
 	private int vsp = Main.getBlockVSP();
 	private boolean remove = false;
-	private int blocksRemoved = 0;
 	private int onGroundTimer = 0;
 	private int miningTimer = 0;
 	private int type = 0;
 	private int myID = 0;
+	
 	public Dummy floorDummy; // Used for floor detection
 
 	public Block(int myX, int myY, int[] spriteSize, int num, int id, GL2 gl) {
@@ -27,12 +26,12 @@ public class Block extends Sprite {
 		
 		width = height = 64;
 		stack = Main.myGrid.getGrid(getX()/64);
-		blocksRemoved = Main.myGrid.blocksRemoved(getX()/64) * 64;
 		type = num;
 		myID = id;
 		
 		switch(type) {
 			case 0: // Regular block
+				floorDummy = new Dummy(0,0,spriteSize,gl);
 				currentImage = Main.images.getBlockImage(hp);;
 				break;
 			case 1: // Dark block
@@ -43,13 +42,21 @@ public class Block extends Sprite {
 				floorDummy = new Dummy(0,0,spriteSize,gl);
 				currentImage = Main.images.apple;
 				break;
+			case 3: // Block icon
+				currentImage = Main.images.blockImg_icon;
+				break;
+			case 4: // Dark block icon
+				currentImage = Main.images.blockImg2_icon;
+				break;
 		}
 		
 	}
 	
 	public void update(GL2 gl) {
-		if(hp <= 0)
+		if(hp <= 0) {
+			Main.hero.giveInventory(type);
 			isAlive = false;
+		}
 		
 		if(shouldFall)
 			fall();
@@ -64,6 +71,7 @@ public class Block extends Sprite {
 		 
 		switch(type) {
 			case 0: // Regular block
+				//floorDummy.update(gl);
 				setImage(Main.images.getBlockImage(hp));
 				break;
 			case 1: // Dark block
@@ -74,6 +82,12 @@ public class Block extends Sprite {
 				//floorDummy.update(gl);
 				setImage(Main.images.apple);
 				break;
+			case 3: // Block icon
+				setImage(Main.images.blockImg_icon);
+				break;
+			case 4: // Dark block icon
+				setImage(Main.images.blockImg2_icon);
+				break;
 		}
 		
 		draw(gl);
@@ -81,7 +95,7 @@ public class Block extends Sprite {
 	
 	public void checkMined() {
 		if(Main.Dummy_Collision(Main.hero.dummy, this)) {
-			if(Main.hero.miningBlock() && Main.hero.getDirection() == Main.hero.getBlockLocaction()) {
+			if(Main.hero.miningBlock() && !Main.hero.checkInventoryStatus() && Main.hero.getDirection() == Main.hero.getBlockLocaction()) {
 				
 				miningTimer++;
 				
@@ -121,19 +135,16 @@ public class Block extends Sprite {
 	public int getID() {
 		return myID;
 	}
+	
+	public void setShouldFall(boolean fall) {
+		shouldFall = fall;
+	}
 
 	public void checkBelow() {
 		// If block is at the bottom of the screen
 		if(getY() >= 896)
 			shouldFall = false;
 				
-		fallDiff = vsp * (Main.getGameTimer() / Main.getGameSpeed());
-
-		if(type == 0) {
-			if(getY() >= Main.worldHeight - (stack * 64) - 64 + fallDiff - blocksRemoved)
-				shouldFall = false;	
-		} else {
-			
 			floorDummy.setWidth(58);
 			floorDummy.setHeight(60);
 			floorDummy.setX(getX()+4);
@@ -144,12 +155,13 @@ public class Block extends Sprite {
 					if(Main.blockArray.get(i).getID() != myID) {
 						shouldFall = false;
 						break;
-					} else
-						shouldFall = true;
+					} else {
+						if(type != 0)
+							shouldFall = true;
+					}
 				}
 			}
-		}
-		
+
 		if(getY() >= 960)
 			remove = true;	
 	}

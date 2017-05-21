@@ -11,6 +11,8 @@ public class Images {
 	// Block images
 	private int blockImg;
 	private int blockImg2;
+	public int blockImg_icon;
+	public int blockImg2_icon;
 	private int bd1;
 	private int bd2;
 	private int bd3;
@@ -31,6 +33,9 @@ public class Images {
 	private int dbd8;
 	private int dbd9;
 	private int dbd10;
+	
+	// Dummy image
+	public int dummyImg;
 	
 	// Item images
 	public int apple;
@@ -85,6 +90,8 @@ public class Images {
 		// Block images
 		blockImg = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block1.tga", spriteSize);
 		blockImg2 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block2.tga", spriteSize);
+		blockImg_icon = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block1_icon.tga", spriteSize);
+		blockImg2_icon = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block2_icon.tga", spriteSize);
 		bd1 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd1.tga", spriteSize);
 		bd2 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd2.tga", spriteSize);
 		bd3 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd3.tga", spriteSize);
@@ -108,6 +115,8 @@ public class Images {
 		
 		// Item images
 		apple = Main.glTexImageTGAFile(gl, "Sprites/Items/apple.tga", spriteSize);
+		
+		dummyImg = Main.glTexImageTGAFile(gl, "Sprites/Dummy/Dummy.tga", spriteSize);
 		
 		// Lava images
 		lava = Main.glTexImageTGAFile(gl, "Sprites/Lava/lava.tga", spriteSize);

@@ -48,7 +48,7 @@ public class Main {
     public static String intToString = "";
     public static ArrayList<Block> blockArray = new ArrayList<Block>();
     public static String collisionResult = "";
-    public static int pressedRight, pressedLeft, pressedUp;
+    public static int pressedRight, pressedLeft, pressedUp, pressedSpace;
     
     public static void main(String[] args) {
           
@@ -70,7 +70,7 @@ public class Main {
         myGrid = new blockGrid();
         lava = new Lava(spriteSize, gl, 800);
         font = new Font(spriteSize, gl);
-        pressedRight = pressedLeft = pressedUp = 0;
+        pressedRight = pressedLeft = pressedUp = pressedSpace = 0;
         
         
         // Physics runs at 100fps, or 10ms / physics frame
@@ -123,7 +123,6 @@ public class Main {
         	    	}
         	    }
         	    else { // Block is dead (from player)
-        		    System.out.println("Remove me daddy");
         		    blockArray.remove(bA);
         	    }
             }
@@ -154,8 +153,8 @@ public class Main {
             		block = new Block(randomBlockX, -128, spriteSize, 1, blockID, gl); 
             	else // Block will be a fruit
             		block = new Block(randomBlockX, -128, spriteSize, 2, blockID, gl); 
-            	System.out.println(randomBlockType);
-	            blockArray.add(block);    	
+
+            	blockArray.add(block);    	
 	            
 	            temp = nextBlock + 25;
 	            
@@ -221,6 +220,14 @@ public class Main {
 	        	hero.keyDown("z");
 	        }
 	        
+	        if (window.kbState[KeyEvent.VK_SPACE]) {
+	        	pressedSpace++;
+	        	
+	        	if(pressedSpace == 1)
+	        		hero.keyDown("space");
+	        } else
+	        	pressedSpace = 0;
+	        
 	        if (window.kbState[KeyEvent.VK_CONTROL]) {
 	        	hero.ctrlKeyDown(true);
 	        } else
@@ -246,7 +253,7 @@ public class Main {
             }
             
             intToString = String.valueOf(playerScore);
-            drawText(gl, "SCORE:" + intToString, 10, 10, camera, spriteSize);
+            drawText(gl, "SCORE:" + intToString, 10, 10, camera, spriteSize, false);
             
             /**
             drawText(gl, "448", 10, 448, camera, spriteSize);
@@ -261,8 +268,18 @@ public class Main {
         }  
     }
     
-    public static void drawText(GL2 gl, String text, int x, int y, Camera cam, int[] textSize){
-        ArrayList<FontSprite> Text = new ArrayList<>(Font.getTextures(text, x, y, textSize, gl));
+    public static void drawText(GL2 gl, String text, int x, int y, Camera cam, int[] textSize, boolean newSize){
+    	
+    	ArrayList<FontSprite> Text;
+    	
+    	if(newSize) {
+    		Text = new ArrayList<>(Font.getTextures(text, x, y, textSize, gl));
+    	} else {
+    		textSize[0] = 14;
+    		textSize[1] = 19;
+    		Text = new ArrayList<>(Font.getTextures(text, x, y, textSize, gl));
+    	}
+    	
         for (int i = 0; i < Text.size(); i++){
             DrawSprite(gl, Text.get(i).getImage(), Text.get(i).getX(), Text.get(i).getY(), Text.get(i).getWidth(), Text.get(i).getHeight(), cam);
         }

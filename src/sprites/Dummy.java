@@ -6,7 +6,6 @@ import main.Main;
 
 public class Dummy extends Sprite {
 	
-	private static int dummyImg;
 	private boolean shouldFall = true;
 	
 	private int hp = 100;
@@ -21,10 +20,9 @@ public class Dummy extends Sprite {
 		super(myX, myY, spriteSize, gl);
 		
 		width = height = 64;
-		dummyImg = Main.glTexImageTGAFile(gl, "Sprites/Dummy/Dummy.tga", spriteSize);
 		vsp = Main.getBlockVSP();
 		
-		setImage(dummyImg);
+		setImage(Main.images.dummyImg);
 	}
 	
 	public void setWidth(int w) {
@@ -45,7 +43,7 @@ public class Dummy extends Sprite {
 	}
 	
 	public void update(GL2 gl) {
-		setImage(dummyImg);
+		setImage(Main.images.dummyImg);
 		sink();
 		draw(gl);
 	}

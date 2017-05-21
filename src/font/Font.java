@@ -18,8 +18,6 @@ public class Font {
 	}
 	
 	public static ArrayList<FontSprite> getTextures(String text, int x, int y, int[] spriteSize, GL2 gl){
-		spriteSize[0] = 14;
-		spriteSize[1] = 19;
 		Text = new ArrayList<FontSprite>();
 		for (int i = 0; i < text.length(); i++){
     		switch (text.charAt(i)){
