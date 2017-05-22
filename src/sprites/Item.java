@@ -4,23 +4,22 @@ import com.jogamp.opengl.GL2;
 
 import main.Main;
 
-public class Block extends Sprite {
+public class Item extends Sprite {
 
 	public int currentImage;
 	
 	private boolean shouldFall = true;
 	
-	private int hp = 100;
 	private int vsp = Main.getBlockVSP();
 	private boolean remove = false;
 	private int onGroundTimer = 0;
-	private int miningTimer = 0;
 	private int type = 0;
 	private int myID = 0;
+	public boolean isCollected = false;
 	
 	public Dummy floorDummy; // Used for floor detection
 
-	public Block(int myX, int myY, int[] spriteSize, int num, int id, GL2 gl) {
+	public Item(int myX, int myY, int[] spriteSize, int num, int id, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
 		
 		width = height = 64;
@@ -30,22 +29,16 @@ public class Block extends Sprite {
 		floorDummy = new Dummy(0,0,spriteSize,gl);
 		
 		switch(type) {
-			case 0: // Regular block
-				currentImage = Main.images.getBlockImage(hp);
+			case 0: // Apple
+				currentImage = Main.images.apple;
 				break;
-			case 1: // Dark block
-				currentImage = Main.images.getDarkBlockImage(hp);
-				break;
-		}
-		
+		}		
 	}
 	
 	public void update(GL2 gl) {
-		if(hp <= 0) {
-			Main.hero.giveInventory(type);
+		if(isCollected)
 			isAlive = false;
-		}
-		
+
 		if(shouldFall)
 			fall();
 		else {
@@ -55,42 +48,21 @@ public class Block extends Sprite {
 		
 		checkBelow();
 		checkVSP();
-		checkMined();		
+		checkCollected();		
 		 
 		switch(type) {
-			case 0: // Regular block
-				//floorDummy.update(gl);
-				setImage(Main.images.getBlockImage(hp));
-				break;
-			case 1: // Dark block
-				//floorDummy.update(gl);
-				setImage(Main.images.getDarkBlockImage(hp));
+			case 0: // Apple
+				setImage(Main.images.apple);
 				break;
 		}
-		
+				
 		draw(gl);
 	}
 	
-	public void checkMined() {
-		if(Main.Dummy_Collision(Main.hero.dummy, this)) {
-			if(Main.hero.miningBlock() && !Main.hero.checkInventoryStatus() && Main.hero.getDirection() == Main.hero.getBlockLocaction()) {
-				
-				miningTimer++;
-				
-				if(miningTimer % 10 == 0) {
-					if(hp == 100)
-						hp = 99;
-					else if(hp == 99)
-						hp -= 9;
-					else
-						hp -= 10;
-					miningTimer = 0;
-				}
-			}
-		} else {
-			miningTimer = 0;
-			hp = 100;
-		}
+	public void checkCollected() {
+		if(Main.Dummy_Collision(Main.hero.myDummy, this)) {
+			isCollected = true;
+		} 
 	}
 
 	public void checkVSP() {
@@ -146,14 +118,6 @@ public class Block extends Sprite {
 	
 	public boolean checkRemoval() {
 		return remove;
-	}
-	
-	public void setHP(int dmg) {
-		hp -= dmg;
-	}
-	
-	public int getHP() {
-		return hp;
 	}
 	
 	public int getOnGroundTimer() {

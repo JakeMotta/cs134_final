@@ -9,15 +9,17 @@ public class Hero extends Sprite implements Actor {
 
 	public static int currentImage;
 	
-	private static int walkLeft[] = new int[3];
-	private static int walkRight[] = new int[3];
-	private static int walkUp[] = new int[3];
-	private static int walkDown[] = new int[3];
+	private static int walkLeft;
+	private static int walkRight;
+	private static int walkUp;
+	private static int walkDown;
     
 	private static int mineLeft[] = new int[3];
 	private static int mineRight[] = new int[3];
 	private static int mineUp[] = new int[3];
 	private static int mineDown[] = new int[3];
+	
+	private static int deathImg;
 	
 	private int inventory[] = new int[] {-1, -1, -1};
 	private int size[];
@@ -42,6 +44,10 @@ public class Hero extends Sprite implements Actor {
     private int jumpCounter = 0;
     private int textTimer = 0;
     private int gravityInc = 20;
+    private int inventorySpace = 3;
+    private int hp = 100;
+    private int blockHitTimer = 0;
+    
     public Dummy dummy; // Used for player collision and mining collision
     public Dummy floorDummy; // Used for floor detection
     public Dummy myDummy; // Used for knowing when a block is on-top of us
@@ -50,18 +56,10 @@ public class Hero extends Sprite implements Actor {
 		super(myX, myY, spriteSize, gl);
 
 		// Walking textures
-		walkLeft[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl1.tga", spriteSize);
-		walkLeft[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl2.tga", spriteSize);
-		walkLeft[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl3.tga", spriteSize);
-		walkRight[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr1.tga", spriteSize);
-		walkRight[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr2.tga", spriteSize);
-		walkRight[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr3.tga", spriteSize);
-		walkUp[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu1.tga", spriteSize);
-		walkUp[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu2.tga", spriteSize);
-		walkUp[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu3.tga", spriteSize);
-		walkDown[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd1.tga", spriteSize);
-		walkDown[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd2.tga", spriteSize);
-		walkDown[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd3.tga", spriteSize);
+		walkLeft = Main.glTexImageTGAFile(gl, "Sprites/Hero/wl3.tga", spriteSize);
+		walkRight = Main.glTexImageTGAFile(gl, "Sprites/Hero/wr3.tga", spriteSize);
+		walkUp = Main.glTexImageTGAFile(gl, "Sprites/Hero/wu3.tga", spriteSize);
+		walkDown = Main.glTexImageTGAFile(gl, "Sprites/Hero/wd3.tga", spriteSize);
 		
 		// Mining textures
 		mineLeft[0] = Main.glTexImageTGAFile(gl, "Sprites/Hero/ml1.tga", spriteSize);
@@ -77,8 +75,11 @@ public class Hero extends Sprite implements Actor {
 		mineDown[1] = Main.glTexImageTGAFile(gl, "Sprites/Hero/md2.tga", spriteSize);
 		mineDown[2] = Main.glTexImageTGAFile(gl, "Sprites/Hero/md3.tga", spriteSize);
 		
+		// Death image
+		deathImg = Main.glTexImageTGAFile(gl, "Sprites/Hero/death.tga", spriteSize);
+		
 	    vsp = hsp = speed = Main.getBlockVSP();
-		direction = "right";
+		direction = "down";
 	    width = 64;
 	    height = 64;
 	    keyDown = null;
@@ -90,7 +91,7 @@ public class Hero extends Sprite implements Actor {
 	 	floorDummy = new Dummy(0,0,spriteSize,gl);
 	 	myDummy = new Dummy(0,0,spriteSize,gl);
 	 	
-	 	currentImage = walkDown[2];
+	 	currentImage = walkDown;
 	}
 	
 	// Set hero's speed
@@ -100,6 +101,10 @@ public class Hero extends Sprite implements Actor {
 
 	@Override
 	public void update(GL2 gl) {
+		
+		if(hp <= 0) {
+			isAlive = false;
+		}
 
 		//dummy.update(gl);
 		//myDummy.update(gl);
@@ -110,6 +115,8 @@ public class Hero extends Sprite implements Actor {
 		checkMining();
 		checkInventory();
 		checkPlayerSpeech(gl);
+		checkLava();
+		blockHit();
 	
 		if(isGrounded == false)
 			gravity();		
@@ -121,16 +128,16 @@ public class Hero extends Sprite implements Actor {
 		if (shouldMove) {
 			
 			if(direction == "left")
-				currentImage = walkLeft[2];
+				currentImage = walkLeft;
 			
 			if(direction == "right")
-				currentImage = walkRight[2];
+				currentImage = walkRight;
 			
 			if(direction == "up")
-				currentImage = walkUp[2];
+				currentImage = walkUp;
 			
 			if(direction == "down")
-				currentImage = walkDown[2];
+				currentImage = walkDown;
 		}
 	    
 	    // Reset booleans
@@ -141,6 +148,42 @@ public class Hero extends Sprite implements Actor {
 	    setImage(currentImage);
 
 	    draw(gl);
+	}
+	
+	public void setHP(int dmg) {
+		hp -= dmg;
+	}
+	
+	public int getHP() {
+		return hp;
+	}
+	
+	public void blockHit() {
+		if(!checkCenter()) {
+			blockHitTimer++;
+			
+			if(blockHitTimer % 50 == 0)
+				hp -= 10;
+		} else
+			blockHitTimer = 0;
+	}
+	
+	public void checkLava() {
+		if(getY() > Main.lava.getY()-10) {
+			currentImage = deathImg;
+			lavaHit();
+			hp -= 20;
+			System.out.println("YOURE IN LAVA!");
+		}
+	}
+	
+	public void lavaHit() {
+		for(int i = 0; i < 60; i++) {
+			if(i % 20 == 0) {
+				shouldMove = false;
+				moveY(-64);
+			}
+		}
 	}
 	
 	public void checkPlayerSpeech(GL2 gl) {
@@ -167,9 +210,18 @@ public class Hero extends Sprite implements Actor {
 		for(int i = 0; i < inventory.length; i++) {
 			if(inventory[i] == -1) {
 				inventory[i] = type;
+				inventorySpace--;
 				break;
 			}
 		}
+	}
+	
+	public void giveItem(int type) {
+		if(type == 0) {// Apple recieved
+			if(hp + 20 <= 100)
+				hp += 20;
+		}
+		
 	}
 	
 	public void checkInventory() {
@@ -187,20 +239,19 @@ public class Hero extends Sprite implements Actor {
 	public boolean checkInventoryStatus() {
 		return inventoryFull;
 	}
+	
+	public int getInventorySpace() {
+		return inventorySpace;
+	}
 		
 	public void checkMining() {
+		if(direction == "left" && isMining && !checkLeft()) {}
 		
-		if(direction == "left" && isMining && !checkLeft()) {
-		}
+		if(direction == "right" && isMining && !checkRight()) {}
 		
-		if(direction == "right" && isMining && !checkRight()) {
-		}
+		if(direction == "up" && isMining && !checkAbove()) {}
 		
-		if(direction == "up" && isMining && !checkAbove()) {
-		}
-		
-		if(direction == "down" && isMining && !checkBelow()) {
-		}
+		if(direction == "down" && isMining && !checkBelow()) {}
 	}
 	
 	public void checkVSP() {
@@ -371,6 +422,7 @@ public class Hero extends Sprite implements Actor {
 						
 						Main.blockArray.add(block);
 						inventory[i] = -1;
+						inventorySpace++;
 					}
 					
 					if(direction == "right" && checkRight() && getX() < Main.worldWidth-getWidth()) {
@@ -381,6 +433,7 @@ public class Hero extends Sprite implements Actor {
 						
 						Main.blockArray.add(block);
 						inventory[i] = -1;
+						inventorySpace++;
 					}
 					
 					if(direction == "down" && checkBelow()) {
@@ -391,6 +444,7 @@ public class Hero extends Sprite implements Actor {
 						
 						Main.blockArray.add(block);
 						inventory[i] = -1;
+						inventorySpace++;
 					}
 				}
 			}

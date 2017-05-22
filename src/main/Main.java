@@ -36,6 +36,8 @@ public class Main {
     public static Lava lava;
     public static Font font;
     public static Images images;
+    public static Block block;
+    public static Item item;
     
     public static int worldWidth;
     public static int worldHeight;
@@ -45,6 +47,7 @@ public class Main {
     public static int playerScore = 0;
     public static String intToString = "";
     public static ArrayList<Block> blockArray = new ArrayList<Block>();
+    public static ArrayList<Item> itemArray = new ArrayList<Item>();
     public static String collisionResult = "";
     public static int pressedRight, pressedLeft, pressedUp, pressedSpace;
     
@@ -61,14 +64,13 @@ public class Main {
         
         images = new Images(spriteSize,gl);
         camera = new Camera(window.getWidth(),window.getHeight());
-        hero = new Hero(512, 0, spriteSize, gl);
+        hero = new Hero(512, 704, spriteSize, gl);
         background = new Background(spriteSize, gl);
         worldWidth = background.getWorldWidth();
         worldHeight = background.getWorldHeight();
         lava = new Lava(spriteSize, gl, 800);
         font = new Font(spriteSize, gl);
         pressedRight = pressedLeft = pressedUp = pressedSpace = 0;
-        
         
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
@@ -108,18 +110,32 @@ public class Main {
             camera.update(hero);
             background.update(gl);
             
+            for(int iA = 0; iA < itemArray.size(); iA++) {
+        	    if(itemArray.get(iA).isAlive()) { 
+        	    	if(!itemArray.get(iA).checkRemoval()) // Item is alive
+        	    		itemArray.get(iA).update(gl);
+        	    	else // Item is below screen and needs to be removed
+        	    		itemArray.remove(iA);
+        	    }
+        	    else { // Item is dead (from player)
+        	    	hero.giveItem(itemArray.get(iA).getType());
+        	    	itemArray.remove(iA);
+        	    }
+            }
+            
             for(int bA = 0; bA < blockArray.size(); bA++) {
-            	
         	    if(blockArray.get(bA).isAlive()) { 
-        	    	if(!blockArray.get(bA).checkRemoval()) { // Block is alive
+        	    	if(!blockArray.get(bA).checkRemoval()) // Block is alive
         	    		blockArray.get(bA).update(gl);
-        	    	}
-        	    	else { // Block is below screen and needs to be removed
+        	    	else // Block is below screen and needs to be removed
         	    		blockArray.remove(bA);
-        	    	}
         	    }
         	    else { // Block is dead (from player)
-        		    blockArray.remove(bA);
+        		    if(blockArray.get(bA).getID() % 7 == 0) {
+        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 0, blockArray.get(bA).getID(), gl);
+        		    	itemArray.add(item);
+        		    }
+        	    	blockArray.remove(bA);
         	    }
             }
             
@@ -133,17 +149,13 @@ public class Main {
 
             	// Add background alert
             	background.addAlert(randomBlockX/64);
-
-            	Block block;
-            	
-            	if(randomBlockType < 75) // Block will be regular
-            		block = new Block(randomBlockX, -128, spriteSize, 0, blockID, gl); 
-            	else if(randomBlockType >= 75 && randomBlockType < 97) // Block will be a dark block
+            	            	
+            	if(randomBlockType < 60) // Block will be regular 
+            		block = new Block(randomBlockX, -128, spriteSize, 0, blockID, gl);  
+            	else  // Block will be a dark block
             		block = new Block(randomBlockX, -128, spriteSize, 1, blockID, gl); 
-            	else // Block will be a fruit
-            		block = new Block(randomBlockX, -128, spriteSize, 2, blockID, gl); 
-
-            	blockArray.add(block);    	
+  
+            	blockArray.add(block); 
 	            
 	            temp = nextBlock + 25;
             }
@@ -239,7 +251,9 @@ public class Main {
             }
             
             intToString = String.valueOf(playerScore);
-            drawText(gl, "SCORE:" + intToString, 10, 10, camera, spriteSize, false);
+            drawText(gl, "SCORE:" + intToString, 10, 25, camera, spriteSize, false);
+            drawText(gl, "CAN CARRY:" + hero.getInventorySpace(), 10, 100, camera, spriteSize, false);
+            drawText(gl, "HEALTH:" + hero.getHP(), 10, 75, camera, spriteSize, false);
             
             /**
             drawText(gl, "448", 10, 448, camera, spriteSize);
@@ -261,8 +275,8 @@ public class Main {
     	if(newSize) {
     		Text = new ArrayList<>(Font.getTextures(text, x, y, textSize, gl));
     	} else {
-    		textSize[0] = 14;
-    		textSize[1] = 19;
+    		textSize[0] = 12;
+    		textSize[1] = 17;
     		Text = new ArrayList<>(Font.getTextures(text, x, y, textSize, gl));
     	}
     	

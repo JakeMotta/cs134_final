@@ -27,6 +27,10 @@ public class Lava {
 		};
 	}
 	
+	public int getY() {
+		return myY;
+	}
+	
 	public void update(GL2 gl, int timer) {
 		
 		for (int i = 0; i < 3; i++) {
