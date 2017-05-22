@@ -78,7 +78,7 @@ public class Hero extends Sprite implements Actor {
 		// Death image
 		deathImg = Main.glTexImageTGAFile(gl, "Sprites/Hero/death.tga", spriteSize);
 		
-	    vsp = hsp = speed = Main.getBlockVSP();
+	    vsp = Main.getBlockVSP();
 		direction = "down";
 	    width = 64;
 	    height = 64;
@@ -94,9 +94,41 @@ public class Hero extends Sprite implements Actor {
 	 	currentImage = walkDown;
 	}
 	
-	// Set hero's speed
-	public void setSpeed(long bgSpeed){
-		speed = vsp;
+	public void reset() {
+		// Strings
+	    keyDown = null;
+	    blockLocation = "down";
+		
+		// Booleans
+	    isMining = false;
+	    ctrlDown = false;
+	    inventoryFull = false;
+	    
+	    // Counters
+	    mineCounter = 0;
+	    jumpCounter = 0;
+	    textTimer = 0;
+	    gravityInc = 20;
+	    inventorySpace = 3;
+	    hp = 100;
+	    blockHitTimer = 0;
+	    
+	    isAlive = true;
+		vsp = Main.getBlockVSP();
+		direction = "down";
+	    width = 64;
+	    height = 64;
+	    keyDown = null;
+	    isGrounded = false;
+	    inventorySpace = 3;
+	    
+	    currentImage = walkDown;	    
+	    setX(512);
+	    setY(512+vsp);
+	    
+	    // Set inventory to default
+	    for(int i = 0; i < inventory.length; i++)
+	    	inventory[i] = -1;
 	}
 
 	@Override
@@ -106,16 +138,17 @@ public class Hero extends Sprite implements Actor {
 			isAlive = false;
 		}
 
-		//dummy.update(gl);
+		dummy.update(gl);
 		//myDummy.update(gl);
 		
+		checkVSP();
 		sink();
-		checkCollision();
-		checkCenter();
+		
 		checkMining();
 		checkInventory();
 		checkPlayerSpeech(gl);
 		checkLava();
+		
 		blockHit();
 	
 		if(isGrounded == false)
@@ -149,7 +182,7 @@ public class Hero extends Sprite implements Actor {
 
 	    draw(gl);
 	}
-	
+
 	public void setHP(int dmg) {
 		hp -= dmg;
 	}
@@ -221,7 +254,6 @@ public class Hero extends Sprite implements Actor {
 			if(hp + 20 <= 100)
 				hp += 20;
 		}
-		
 	}
 	
 	public void checkInventory() {
@@ -339,16 +371,31 @@ public class Hero extends Sprite implements Actor {
 	}
 	
 	public boolean checkAbove() {
-		dummy.setWidth(32);
-		dummy.setHeight(64);
-		dummy.setX(getX()+16);
-		dummy.setY(getY()-height);
 		
-		for(int i = 0; i < Main.blockArray.size(); i++)	
-			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i))) {
+		if(checkCenter()) {
+			dummy.setWidth(32);
+			dummy.setHeight(32);
+			dummy.setX(getX()+16);
+			dummy.setY(getY()-32);
+		} else {
+			dummy.setWidth(32);
+			dummy.setHeight(32);
+			dummy.setX(getX()+16);
+			dummy.setY(getY()+16);
+		}
+		
+		for(int i = 0; i < Main.blockArray.size(); i++)	{
+			// No block on character
+			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i)) && checkCenter()) {
 				blockLocation = "up";
 				return false;	
 			}
+			// Block is on character
+			if(Main.Dummy_Collision(dummy, Main.blockArray.get(i)) && !checkCenter()) {
+				blockLocation = "up";
+				return false;	
+			}
+		}
 		return true;
 	}
 	

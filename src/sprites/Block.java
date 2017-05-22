@@ -53,7 +53,6 @@ public class Block extends Sprite {
 			onGroundTimer++;
 		}
 		
-		checkBelow();
 		checkVSP();
 		checkMined();		
 		 

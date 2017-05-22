@@ -46,7 +46,6 @@ public class Item extends Sprite {
 			onGroundTimer++;
 		}
 		
-		checkBelow();
 		checkVSP();
 		checkCollected();		
 		 
