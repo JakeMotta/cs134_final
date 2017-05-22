@@ -205,6 +205,14 @@ public class Background {
 	public int getWidth() { return width; }
 	public int getHeight() { return height; }
 	
+	public void reset() {
+		for(int i = 0; i < 156; i++) {
+			for(int j = 0; j < 10; j++) {
+				myBackground[i][j] = 0;
+			}
+		}
+	}
+	
 	public void addAlert(int column) {
 		myBackground[(Main.camera.getY()/64)+1][column] = 1;
 	}
@@ -226,7 +234,10 @@ public class Background {
         				image = bg1;
         				break;
         			case 1:
-        				image = alert;
+        				if(i == startYTile + 1)
+        					image = alert;
+        				else
+        					image = bg1;
         				break;
         			default:
         				System.out.println("tile " + myBackground[i][j] + " not printed");

@@ -48,6 +48,7 @@ public class Main {
     public static int gameTimer = 0;
     public static int gameSpeed = 100;
     public static int blockVSP = 4;
+    public static int lavaVSP = 4;
     public static int playerScore = 0;
     public static String intToString = "";
     public static ArrayList<Block> blockArray = new ArrayList<Block>();
@@ -56,6 +57,7 @@ public class Main {
     public static int pressedRight, pressedLeft, pressedUp, pressedSpace;
     public static boolean isGameOver = true;
     public static int playerScoreLast = 0;
+    public static int level = 1;
     
     public static void main(String[] args) {
           
@@ -98,6 +100,7 @@ public class Main {
         int lastPhysicsFrameMs = 0;
         int nextBlock = 0, randomBlockX = 0, randomBlockType = 0, temp = 0, pow = 0;
         int lavaTimer = 0;
+        int spawnRate = 100;
         
         while (!shouldExit) {
 
@@ -143,7 +146,7 @@ public class Main {
 	            background.update(gl);
 	            
 	            // Add new block 
-	            if(nextBlock % 100 == 0) {
+	            if(nextBlock % spawnRate == 0) {
 	            	
 	            	// Get random X position for block
 	            	randomBlockX = getRandom(10) * 64;
@@ -195,18 +198,17 @@ public class Main {
 	        		    if(blockArray.get(bA).getID() % 7 == 0) { // Add random item drop
 	        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 0, blockArray.get(bA).getID(), gl);
 	        		    	itemArray.add(item);
+	        		    } else {
+		        		    if(blockArray.get(bA).getType() == 0) { // Regular block
+		        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 1, blockArray.get(bA).getID(), gl);
+		        		    	itemArray.add(item);
+		        		    }
+		        		    if(blockArray.get(bA).getType() == 1) { // Dark block
+		        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 2, blockArray.get(bA).getID(), gl);
+		        		    	itemArray.add(item);
+		        		    }
 	        		    }
 	        		    
-	        		    // Add mini-block drop
-	        		    if(blockArray.get(bA).getType() == 0) { // Regular block
-	        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 1, blockArray.get(bA).getID(), gl);
-	        		    	itemArray.add(item);
-	        		    }
-	        		    if(blockArray.get(bA).getType() == 1) { // Dark block
-	        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 2, blockArray.get(bA).getID(), gl);
-	        		    	itemArray.add(item);
-	        		    }
-
 	        		    clippy.playClip(blockBreak);
 	        	    	blockArray.remove(bA);
 	        	    }
@@ -225,6 +227,14 @@ public class Main {
 	            	drawText(gl, intToString, 575, (camera.getY()+67) + (i*64), camera, spriteSize, false);
 	            }
             } else {
+            	
+            	camera.setY(Main.worldHeight - 960);
+                lava.setY(worldHeight-160);
+                lavaVSP = 4;
+                spawnRate = 100;
+                level = 1;
+                background.reset();
+                
             	music.stop();
             	hero.reset();
             	playerScore = 0;
@@ -341,8 +351,13 @@ public class Main {
             playerScore = (-1) * ((hero.getY()/ 64) - 155);
             
             if(gameTimer % 1000 == 0) {
-            	pow += 1;
-            	//blockVSP = (int) Math.pow(2, pow);
+            	lavaVSP += 1;
+            	level += 1;
+            	
+            	if(spawnRate > 50)
+            		spawnRate -= level*2;
+            	
+            	System.out.println("Spawn: " + spawnRate);
             }   
         }  
         
@@ -367,6 +382,10 @@ public class Main {
     public static int getBlockVSP() {
     	return blockVSP;
     }
+    
+    public static int getLavaVSP() {
+		return lavaVSP;
+	}
     
     public static int getGameTimer() {
     	return gameTimer;

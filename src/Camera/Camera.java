@@ -12,9 +12,7 @@ public class Camera {
 	public Camera(int width, int height) {
 		w = width;
 		h = height;
-		
-		int asdf = Main.worldHeight - 960;
-		//System.out.println(asdf);
+
 		setY(Main.worldHeight - 960);
 	}
 	

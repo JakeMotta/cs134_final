@@ -25,7 +25,7 @@ public class Lava {
 
 		width = height = 128;
 		myY = setY;
-		vsp = Main.getBlockVSP();
+		vsp = Main.getLavaVSP();
 		
 		lavaGrid = new int[][] {
 			{1, 1, 1, 1, 1},	
@@ -48,6 +48,10 @@ public class Lava {
 	
 	public int getY() {
 		return myY;
+	}
+	
+	public void setY(int incY) {
+		myY = incY;
 	}
 	
 	public void update(GL2 gl, int timer) {
@@ -77,7 +81,7 @@ public class Lava {
 	}
 	
 	public void checkVSP() {
-		vsp = Main.getBlockVSP();
+		vsp = Main.getLavaVSP();
 	}
 	
 	public void rise() {
