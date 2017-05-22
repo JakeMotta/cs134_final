@@ -49,7 +49,6 @@ public class Item extends Sprite {
 		if(shouldFall)
 			fall();
 		else {
-			sink();
 			onGroundTimer++;
 		}
 		
@@ -116,7 +115,7 @@ public class Item extends Sprite {
 
 	public void checkBelow() {
 		// If block is at the bottom of the screen
-		if(getY() >= 896)
+		if(getY() >= Main.worldHeight-height)
 			shouldFall = false;
 				
 			floorDummy.setWidth(58);
@@ -136,7 +135,7 @@ public class Item extends Sprite {
 				}
 			}
 
-		if(getY() >= 960)
+		if(getY() >= Main.worldHeight)
 			remove = true;	
 	}
 	

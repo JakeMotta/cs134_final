@@ -47,6 +47,8 @@ public class Hero extends Sprite implements Actor {
     private int inventorySpace = 3;
     private int hp = 100;
     private int blockHitTimer = 0;
+    private int level = 1;
+    private int goal = 480;
     
     public Dummy dummy; // Used for player collision and mining collision
     public Dummy floorDummy; // Used for floor detection
@@ -123,9 +125,9 @@ public class Hero extends Sprite implements Actor {
 	    
 	    currentImage = walkDown;	    
 	    setX(512);
-	    setY(512+vsp);
+	    setY(Main.worldHeight-256+vsp);
 	    
-	    // Set inventory to default
+	    // Set inventory to default 
 	    for(int i = 0; i < inventory.length; i++)
 	    	inventory[i] = -1;
 	}
@@ -141,8 +143,6 @@ public class Hero extends Sprite implements Actor {
 		//myDummy.update(gl);
 		
 		checkVSP();
-		sink();
-		
 		checkMining();
 		checkInventory();
 		checkPlayerSpeech(gl);
@@ -181,6 +181,10 @@ public class Hero extends Sprite implements Actor {
 
 	    draw(gl);
 	}
+	
+	public int getGoal() {
+		return goal;
+	}
 
 	public void setHP(int dmg) {
 		hp -= dmg;
@@ -205,7 +209,6 @@ public class Hero extends Sprite implements Actor {
 			currentImage = deathImg;
 			lavaHit();
 			hp -= 20;
-			System.out.println("YOURE IN LAVA!");
 		}
 	}
 	
@@ -381,12 +384,12 @@ public class Hero extends Sprite implements Actor {
 	
 	public boolean checkAbove() {
 		
-		if(checkCenter()) {
+		if(checkCenter()) { // No block on character
 			dummy.setWidth(32);
-			dummy.setHeight(32);
+			dummy.setHeight(62);
 			dummy.setX(getX()+16);
-			dummy.setY(getY()-32);
-		} else {
+			dummy.setY(getY()-62);
+		} else { // Block is on character
 			dummy.setWidth(32);
 			dummy.setHeight(32);
 			dummy.setX(getX()+16);
@@ -464,46 +467,8 @@ public class Hero extends Sprite implements Actor {
 					moveX(64);	
 		}
 		
-		if(keyDown == "space") {
-			Block block;
-			for(int i = 0; i < inventory.length; i++) {
-				if(inventory[i] != -1) {
-					int rand = Main.getRandom(1000) * 11;
-					
-					if(direction == "left" && checkLeft() && getX() > 0) {
-						if(inventory[i] == 0)
-							block = new Block(getX()-width, getY()-4, defaultSize, 0, rand, myGL); 
-						else
-							block = new Block(getX()-width, getY()-4, defaultSize, 1, rand, myGL);
-						
-						Main.blockArray.add(block);
-						inventory[i] = -1;
-						inventorySpace++;
-					}
-					
-					if(direction == "right" && checkRight() && getX() < Main.worldWidth-getWidth()) {
-						if(inventory[i] == 0)
-							block = new Block(getX()+width, getY()-4, defaultSize, 0, rand, myGL); 
-						else
-							block = new Block(getX()+width, getY()-4, defaultSize, 1, rand, myGL);
-						
-						Main.blockArray.add(block);
-						inventory[i] = -1;
-						inventorySpace++;
-					}
-					
-					if(direction == "down" && checkBelow()) {
-						if(inventory[i] == 0)
-							block = new Block(getX(), getY()+height-4, defaultSize, 0, rand, myGL); 
-						else
-							block = new Block(getX(), getY()+height-4, defaultSize, 1, rand, myGL);
-						
-						Main.blockArray.add(block);
-						inventory[i] = -1;
-						inventorySpace++;
-					}
-				}
-			}
+		if(keyDown == "space" || keyDown == "down") {
+			placeBlockBelow();
 		}	
 
 		if(keyDown == "z") {
@@ -518,9 +483,53 @@ public class Hero extends Sprite implements Actor {
 			if(mineCounter % fps == 0) 
 				getMiningImage(direction, mineCounter/fps);
 		} else
-			isMining = false;
-		
-		
+			isMining = false;	
+	}
+	
+	public boolean playerIsGrounded() {
+		return isGrounded;
+	}
+	
+	public void placeBlockBelow() {
+		Block block;
+		for(int i = 0; i < inventory.length; i++) {
+			if(inventory[i] != -1) {
+				int rand = Main.getRandom(1000) * 11;
+				
+				if(direction == "left" && checkLeft() && getX() > 0) {
+					if(inventory[i] == 0)
+						block = new Block(getX()-width, getY()-4, defaultSize, 0, rand, myGL); 
+					else
+						block = new Block(getX()-width, getY()-4, defaultSize, 1, rand, myGL);
+					
+					Main.blockArray.add(block);
+					inventory[i] = -1;
+					inventorySpace++;
+				}
+				
+				if(direction == "right" && checkRight() && getX() < Main.worldWidth-getWidth()) {
+					if(inventory[i] == 0)
+						block = new Block(getX()+width, getY()-4, defaultSize, 0, rand, myGL); 
+					else
+						block = new Block(getX()+width, getY()-4, defaultSize, 1, rand, myGL);
+					
+					Main.blockArray.add(block);
+					inventory[i] = -1;
+					inventorySpace++;
+				}
+				
+				if(direction == "down" && checkBelow()) {
+					if(inventory[i] == 0)
+						block = new Block(getX(), getY()+height-4, defaultSize, 0, rand, myGL); 
+					else
+						block = new Block(getX(), getY()+height-4, defaultSize, 1, rand, myGL);
+					
+					Main.blockArray.add(block);
+					inventory[i] = -1;
+					inventorySpace++;
+				}
+			}
+		}
 	}
 	
 	public static void getMiningImage(String dir, int count) {

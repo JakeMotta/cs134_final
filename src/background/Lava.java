@@ -12,6 +12,12 @@ public class Lava {
     private int height;
     private int image;
     private int myY;
+    private int vsp;
+    
+    private int startXTile = 0;
+    private int startYTile = 0;
+    private int endXTile = 0;
+    private int endYTile = 0;
 	
 	private int[][] lavaGrid;
 
@@ -19,11 +25,24 @@ public class Lava {
 
 		width = height = 128;
 		myY = setY;
+		vsp = Main.getBlockVSP();
 		
 		lavaGrid = new int[][] {
 			{1, 1, 1, 1, 1},	
 			{0, 0, 0, 0, 0},	
 			{0, 0, 0, 0, 0},	
+			{0, 0, 0, 0, 0},	
+			{0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0},	
+			{0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0},	
+			{0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0},	
+			{0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0},	
+			{0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0},
 		};
 	}
 	
@@ -33,7 +52,12 @@ public class Lava {
 	
 	public void update(GL2 gl, int timer) {
 		
-		for (int i = 0; i < 3; i++) {
+		checkVSP();
+		rise();
+		
+		startYTile = (int) Math.abs(Math.floor((Main.camera.getY())/height));
+				
+		for (int i = 0; i < 15; i++) {
     		for(int j = 0; j < 5; j++) {
 
     			switch(lavaGrid[i][j]) {
@@ -50,5 +74,14 @@ public class Lava {
     			Main.DrawSprite(gl, image, (j * width), myY + (i * height), width, height, Main.camera);
     		}
         }
+	}
+	
+	public void checkVSP() {
+		vsp = Main.getBlockVSP();
+	}
+	
+	public void rise() {
+		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 
+			myY -= vsp;	
 	}
 }

@@ -37,7 +37,6 @@ public class Block extends Sprite {
 				currentImage = Main.images.getDarkBlockImage(hp);
 				break;
 		}
-		
 	}
 	
 	public void update(GL2 gl) {
@@ -48,7 +47,6 @@ public class Block extends Sprite {
 		if(shouldFall)
 			fall();
 		else {
-			sink();
 			onGroundTimer++;
 		}
 		
@@ -118,7 +116,7 @@ public class Block extends Sprite {
 
 	public void checkBelow() {
 		// If block is at the bottom of the screen
-		if(getY() >= 896)
+		if(getY() >= Main.worldHeight-height)
 			shouldFall = false;
 				
 			floorDummy.setWidth(58);
@@ -138,7 +136,7 @@ public class Block extends Sprite {
 				}
 			}
 
-		if(getY() >= 960)
+		if(getY() >= Main.worldHeight)
 			remove = true;	
 	}
 	

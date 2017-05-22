@@ -9,12 +9,7 @@ public class Dummy extends Sprite {
 	private boolean shouldFall = true;
 	
 	private int hp = 100;
-	private int stack = 0;
-	private int fallDiff = 0;
 	private int vsp = Main.getBlockVSP();
-	private boolean remove = false;
-	private int blocksRemoved = 0;
-	private int onGroundTimer = 0;
 
 	public Dummy(int myX, int myY, int[] spriteSize, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
@@ -44,7 +39,6 @@ public class Dummy extends Sprite {
 	
 	public void update(GL2 gl) {
 		setImage(Main.images.dummyImg);
-		sink();
 		draw(gl);
 	}
 }

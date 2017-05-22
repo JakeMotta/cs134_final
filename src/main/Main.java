@@ -55,6 +55,7 @@ public class Main {
     public static String collisionResult = "";
     public static int pressedRight, pressedLeft, pressedUp, pressedSpace;
     public static boolean isGameOver = true;
+    public static int playerScoreLast = 0;
     
     public static void main(String[] args) {
           
@@ -68,13 +69,14 @@ public class Main {
         long curFrameNS = System.nanoTime();
         
         images = new Images(spriteSize,gl);
-        camera = new Camera(window.getWidth(),window.getHeight());
-        hero = new Hero(512, 512+blockVSP, spriteSize, gl);
         background = new Background(spriteSize, gl);
         worldWidth = background.getWorldWidth();
         worldHeight = background.getWorldHeight();
-        lava = new Lava(spriteSize, gl, 800);
+        camera = new Camera(window.getWidth(),window.getHeight());
+        hero = new Hero(512, (worldHeight-256)+blockVSP, spriteSize, gl);
+        lava = new Lava(spriteSize, gl, worldHeight-160);
         font = new Font(spriteSize, gl);
+        
         pressedRight = pressedLeft = pressedUp = pressedSpace = 0;
         lastFrameNS = curFrameNS; 
         curFrameNS = System.nanoTime();
@@ -152,9 +154,9 @@ public class Main {
 	            	background.addAlert(randomBlockX/64);
 	            	            	
 	            	if(randomBlockType < 60) // Block will be regular 
-	            		block = new Block(randomBlockX, -128, spriteSize, 0, blockID, gl);  
+	            		block = new Block(randomBlockX, camera.getY()-128, spriteSize, 0, blockID, gl);  
 	            	else  // Block will be a dark block
-	            		block = new Block(randomBlockX, -128, spriteSize, 1, blockID, gl); 
+	            		block = new Block(randomBlockX, camera.getY()-128, spriteSize, 1, blockID, gl); 
 	  
 	            	blockArray.add(block); 
 		            
@@ -204,7 +206,7 @@ public class Main {
 	        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 2, blockArray.get(bA).getID(), gl);
 	        		    	itemArray.add(item);
 	        		    }
-        		    	
+
 	        		    clippy.playClip(blockBreak);
 	        	    	blockArray.remove(bA);
 	        	    }
@@ -213,21 +215,15 @@ public class Main {
 	            hero.update(gl);
 	            lava.update(gl, lavaTimer);
 	     	   	
-	     	    intToString = String.valueOf(playerScore);
-	            drawText(gl, "SCORE:" + intToString, 10, 25, camera, spriteSize, false);
-	            drawText(gl, "CAN CARRY:" + hero.getInventorySpace(), 10, 100, camera, spriteSize, false);
-	            drawText(gl, "HEALTH:" + hero.getHP(), 10, 75, camera, spriteSize, false);
+	     	    intToString = String.valueOf(playerScoreLast);
+	            drawText(gl, "SCORE:" + intToString, 10, camera.getY()+25, camera, spriteSize, false);
+	            drawText(gl, "CAN CARRY:" + hero.getInventorySpace(), 10, camera.getY()+100, camera, spriteSize, false);
+	            drawText(gl, "HEALTH:" + hero.getHP(), 10, camera.getY()+75, camera, spriteSize, false);       
 	            
-	            /**
-	            drawText(gl, "448", 10, 448, camera, spriteSize);
-	            drawText(gl, "512", 10, 512, camera, spriteSize);
-	            drawText(gl, "576", 10, 576, camera, spriteSize);
-	            drawText(gl, "640", 10, 640, camera, spriteSize);
-	            drawText(gl, "704", 10, 704, camera, spriteSize);
-	            drawText(gl, "768", 10, 768, camera, spriteSize);
-	            drawText(gl, "832", 10, 832, camera, spriteSize);
-	            drawText(gl, "896", 10, 896, camera, spriteSize);
-	            **/
+	            for(int i = 0; i < 14; i++) {
+	            	intToString = String.valueOf((camera.getY()/64) - ((worldHeight/64)-i-1));
+	            	drawText(gl, intToString, 575, (camera.getY()+67) + (i*64), camera, spriteSize, false);
+	            }
             } else {
             	music.stop();
             	hero.reset();
@@ -242,9 +238,21 @@ public class Main {
             	int[] mySize = new int[2];
             	mySize[0] = 56;
             	mySize[1] = 76;
-            	drawText(gl, "GAME OVER", 70, 300, camera, mySize, true);
+            	drawText(gl, "GAME OVER", 68, camera.getY()+300, camera, mySize, true);
             	
-            	drawText(gl, "PRESS ENTER TO RETRY", 225, 400, camera, mySize, false);
+            	drawText(gl, "PRESS ENTER TO RETRY", 200, camera.getY()+400, camera, mySize, false);
+            	
+            	intToString = String.valueOf(playerScoreLast);
+            	mySize[0] = 28;
+            	mySize[1] = 38;
+            	
+            	if(playerScoreLast < 10)
+            		drawText(gl, "SCORE:" + intToString, 222, camera.getY()+500, camera, mySize, true);
+            	else if(playerScoreLast > 0 && playerScoreLast < 100)
+            		drawText(gl, "SCORE:" + intToString, 208, camera.getY()+500, camera, mySize, true);
+            	else
+            		drawText(gl, "SCORE:" + intToString, 194, camera.getY()+500, camera, mySize, true);
+
             	nextBlock = 0;
             }
             	         
@@ -277,7 +285,7 @@ public class Main {
 	
 	        if (window.kbState[KeyEvent.VK_DOWN]) {
 	        	hero.keyDown("down");
-	        }
+	        }     
 	
 	        if (window.kbState[KeyEvent.VK_LEFT]) {
 	        	pressedLeft++;
@@ -326,10 +334,11 @@ public class Main {
 	            	lavaTimer++;
 	            else
 	            	lavaTimer = 0;      
-         
-            if(nextBlock % 100 == 0) {
-            	playerScore += 1;
-            }
+            
+            if(playerScore > playerScoreLast)
+            	playerScoreLast = playerScore;
+            
+            playerScore = (-1) * ((hero.getY()/ 64) - 155);
             
             if(gameTimer % 1000 == 0) {
             	pow += 1;
