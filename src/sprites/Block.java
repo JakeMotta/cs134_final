@@ -42,7 +42,6 @@ public class Block extends Sprite {
 	
 	public void update(GL2 gl) {
 		if(hp <= 0) {
-			Main.hero.giveInventory(type);
 			isAlive = false;
 		}
 		

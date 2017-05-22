@@ -16,6 +16,7 @@ public class Item extends Sprite {
 	private int type = 0;
 	private int myID = 0;
 	public boolean isCollected = false;
+	private int lifeSpan = 500;
 	
 	public Dummy floorDummy; // Used for floor detection
 
@@ -32,6 +33,12 @@ public class Item extends Sprite {
 			case 0: // Apple
 				currentImage = Main.images.apple;
 				break;
+			case 1: // Block
+				currentImage = Main.images.blockImg_icon;
+				break;
+			case 2: // Dark block
+				currentImage = Main.images.blockImg2_icon;
+				break;
 		}		
 	}
 	
@@ -47,15 +54,33 @@ public class Item extends Sprite {
 		}
 		
 		checkVSP();
-		checkCollected();		
+		checkCollected();	
+		checkLifeSpan();
 		 
 		switch(type) {
 			case 0: // Apple
 				setImage(Main.images.apple);
 				break;
+			case 1: // Block
+				setImage(Main.images.blockImg_icon);
+				break;
+			case 2: // Dark block
+				setImage(Main.images.blockImg2_icon);
+				break;
 		}
 				
 		draw(gl);
+	}
+	
+	public void checkLifeSpan() {
+		lifeSpan -= 1;
+		
+		if(lifeSpan <= 0)
+			isAlive = false;
+	}
+	
+	public int getLifeSpan() {
+		return lifeSpan;
 	}
 	
 	public void checkCollected() {

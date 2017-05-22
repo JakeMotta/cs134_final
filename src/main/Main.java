@@ -88,12 +88,9 @@ public class Main {
 			blockBreak = clippy.loadClip("sounds/pop.wav");
 			music = clippy.loadClip("sounds/main_music.wav");
 		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        
-        clippy.playClip(music);
-        
+ 
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
         int lastPhysicsFrameMs = 0;
@@ -130,7 +127,14 @@ public class Main {
             		    	blockArray.add(block);    	
                     	}
                     }
-                    System.out.println("Run once!");
+                    
+                    try { // Reset the music
+            			music = clippy.loadClip("sounds/main_music.wav");
+            		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            			e.printStackTrace();
+            		}
+                    
+                    music.start();
             	}
             	
 	            camera.update(hero);
@@ -171,7 +175,8 @@ public class Main {
 	        	    		itemArray.remove(iA);
 	        	    }
 	        	    else { // Item is dead (from player)
-	        	    	hero.giveItem(itemArray.get(iA).getType());
+	        	    	if(itemArray.get(iA).getLifeSpan() > 0) // The player picked the item up
+	        	    		hero.giveItem(itemArray.get(iA).getType()); // Add to player's inventory
 	        	    	itemArray.remove(iA);
 	        	    }
 	            }
@@ -185,10 +190,21 @@ public class Main {
 	        	    		blockArray.remove(bA);
 	        	    }
 	        	    else { // Block is dead (from player)
-	        		    if(blockArray.get(bA).getID() % 7 == 0) {
+	        		    if(blockArray.get(bA).getID() % 7 == 0) { // Add random item drop
 	        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 0, blockArray.get(bA).getID(), gl);
 	        		    	itemArray.add(item);
 	        		    }
+	        		    
+	        		    // Add mini-block drop
+	        		    if(blockArray.get(bA).getType() == 0) { // Regular block
+	        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 1, blockArray.get(bA).getID(), gl);
+	        		    	itemArray.add(item);
+	        		    }
+	        		    if(blockArray.get(bA).getType() == 1) { // Dark block
+	        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 2, blockArray.get(bA).getID(), gl);
+	        		    	itemArray.add(item);
+	        		    }
+        		    	
 	        		    clippy.playClip(blockBreak);
 	        	    	blockArray.remove(bA);
 	        	    }
@@ -213,7 +229,7 @@ public class Main {
 	            drawText(gl, "896", 10, 896, camera, spriteSize);
 	            **/
             } else {
-            	
+            	music.stop();
             	hero.reset();
             	playerScore = 0;
             	

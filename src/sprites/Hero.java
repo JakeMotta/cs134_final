@@ -120,7 +120,6 @@ public class Hero extends Sprite implements Actor {
 	    height = 64;
 	    keyDown = null;
 	    isGrounded = false;
-	    inventorySpace = 3;
 	    
 	    currentImage = walkDown;	    
 	    setX(512);
@@ -138,7 +137,7 @@ public class Hero extends Sprite implements Actor {
 			isAlive = false;
 		}
 
-		dummy.update(gl);
+		//dummy.update(gl);
 		//myDummy.update(gl);
 		
 		checkVSP();
@@ -239,20 +238,30 @@ public class Hero extends Sprite implements Actor {
 		return isMining;
 	}
 	
-	public void giveInventory(int type) {
-		for(int i = 0; i < inventory.length; i++) {
-			if(inventory[i] == -1) {
-				inventory[i] = type;
-				inventorySpace--;
-				break;
-			}
-		}
-	}
-	
 	public void giveItem(int type) {
-		if(type == 0) {// Apple recieved
-			if(hp + 20 <= 100)
-				hp += 20;
+		switch (type) {
+			case 0: // Apple recieved
+				if(hp + 20 <= 100)
+					hp += 20;
+				break;
+			case 1: // Block recieved
+				for(int i = 0; i < inventory.length; i++) {
+					if(inventory[i] == -1) {
+						inventory[i] = 0;
+						inventorySpace--;
+						break;
+					}
+				}
+				break;
+			case 2: // Dark block recieved
+				for(int i = 0; i < inventory.length; i++) {
+					if(inventory[i] == -1) {
+						inventory[i] = 1;
+						inventorySpace--;
+						break;
+					}
+				}
+				break;
 		}
 	}
 	
