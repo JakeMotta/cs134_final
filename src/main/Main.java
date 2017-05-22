@@ -7,9 +7,9 @@ import Camera.Camera;
 import Camera.Window;
 import background.Background;
 import background.Lava;
-import background.blockGrid;
 import sprites.*;
 import font.Font;
+import sound.ClipPlayer;
 
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
@@ -19,7 +19,9 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.imageio.ImageIO;
 
 public class Main {
@@ -34,20 +36,28 @@ public class Main {
     public static Camera camera;
     public static Hero hero;
     public static Background background;
-    public static blockGrid myGrid;
     public static Lava lava;
     public static Font font;
+    public static Images images;
+    public static Block block;
+    public static Item item;
+    public static ClipPlayer clippy = new ClipPlayer();
     
     public static int worldWidth;
     public static int worldHeight;
     public static int gameTimer = 0;
     public static int gameSpeed = 100;
-    public static int blockVSP = 2;
+    public static int blockVSP = 4;
+    public static int lavaVSP = 4;
     public static int playerScore = 0;
     public static String intToString = "";
     public static ArrayList<Block> blockArray = new ArrayList<Block>();
+    public static ArrayList<Item> itemArray = new ArrayList<Item>();
     public static String collisionResult = "";
-    public static int pressedRight, pressedLeft, pressedUp;
+    public static int pressedRight, pressedLeft, pressedUp, pressedSpace;
+    public static boolean isGameOver = true;
+    public static int playerScoreLast = 0;
+    public static int level = 1;
     
     public static void main(String[] args) {
           
@@ -60,40 +70,41 @@ public class Main {
         long lastFrameNS;
         long curFrameNS = System.nanoTime();
         
-        camera = new Camera(window.getWidth(),window.getHeight());
-        hero = new Hero(512, 0, spriteSize, gl);
+        images = new Images(spriteSize,gl);
         background = new Background(spriteSize, gl);
         worldWidth = background.getWorldWidth();
         worldHeight = background.getWorldHeight();
-        myGrid = new blockGrid();
-        lava = new Lava(spriteSize, gl, 800);
+        camera = new Camera(window.getWidth(),window.getHeight());
+        hero = new Hero(512, (worldHeight-256)+blockVSP, spriteSize, gl);
+        lava = new Lava(spriteSize, gl, worldHeight-160);
         font = new Font(spriteSize, gl);
-        pressedRight = pressedLeft = pressedUp = 0;
         
+        pressedRight = pressedLeft = pressedUp = pressedSpace = 0;
+        lastFrameNS = curFrameNS; 
+        curFrameNS = System.nanoTime();
+        long deltaTimeMS = (curFrameNS - lastFrameNS) / 1000000;
+        
+        // Sounds
+        Clip blockBreak = null;
+        Clip music = null;
+        
+        try {
+			blockBreak = clippy.loadClip("sounds/pop.wav");
+			music = clippy.loadClip("sounds/main_music.wav");
+		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+			e.printStackTrace();
+		}
+ 
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
         int lastPhysicsFrameMs = 0;
-        int nextBlock = 0, randomBlockX = 0, temp = 0, pow = 0;
+        int nextBlock = 0, randomBlockX = 0, randomBlockType = 0, temp = 0, pow = 0;
         int lavaTimer = 0;
-        
-        // Starting blocks
-        for(int i = 1; i <= 3; i++) {
-        	for(int j = 0; j < 10; j++) {
-		        Block block;
-		    	block = new Block(j*64, worldHeight-(64*i+blockVSP), spriteSize, gl);
-		    	blockArray.add(block);    	
-        	}
-        }
+        int spawnRate = 100;
         
         while (!shouldExit) {
-        	
+
             System.arraycopy(window.kbState, 0, window.kbPrevState, 0, window.kbState.length);
-            lastFrameNS = curFrameNS; 
-            curFrameNS = System.nanoTime();
-            long deltaTimeMS = (curFrameNS - lastFrameNS) / 1000000;
-            
-            long bgSpeed = (1 * deltaTimeMS)/4;
-            hero.setSpeed(bgSpeed);
 
             // Actually, this runs the entire OS message pump.
             window.myWindow.display();
@@ -101,78 +112,175 @@ public class Main {
                 shouldExit = true;
                 break;
             }
-                                  
+            
+            if(!hero.isAlive())
+            	isGameOver = true;
+                      
             window.gl.glClearColor(0, 0, 0, 1);
             window.gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
             
-            camera.update(hero);
-            background.update(gl);
+            // ---------------------- UPDATES -----------------------
             
-            for(int bA = 0; bA < blockArray.size(); bA++) {
+            if(!isGameOver) {
             	
-        	    if(blockArray.get(bA).isAlive()) { 
-        	    	if(!blockArray.get(bA).checkRemoval()) { // Block is alive
-        	    		blockArray.get(bA).update(gl);
-        	    	}
-        	    	else { // Block is below screen and needs to be removed
-        	    		myGrid.remove(blockArray.get(bA).getX()/64);
-        	    		blockArray.remove(bA);
-        	    	}
-        	    }
-        	    else { // Block is dead (from player)
-        		    System.out.println("Remove me daddy");
-        		    blockArray.remove(bA);
-        	    }
-            }
-            
-            // Add new block 
-            if(nextBlock % 100 == 0) {
+            	// Run once per game
+            	if(nextBlock == 1) {
+            		// Starting blocks
+                    for(int i = 1; i <= 3; i++) {
+                    	for(int j = 0; j < 10; j++) {
+            		    	block = new Block(j*64, worldHeight-(64*i), spriteSize, 0, (i+j)*7, gl);
+            		    	blockArray.add(block);    	
+                    	}
+                    }
+                    
+                    try { // Reset the music
+            			music = clippy.loadClip("sounds/main_music.wav");
+            		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            			e.printStackTrace();
+            		}
+                    
+                    music.start();
+            	}
             	
-            	int[] blockHistory = myGrid.getHistory();
-
-            	// Get random X position for block
-            	randomBlockX = getRandom(10) * 64;
-            	
-            	// If two blocks in a row
-            	if(blockHistory[0] == randomBlockX)
-	            	while(randomBlockX == blockHistory[0])
-	            		randomBlockX = getRandom(10) * 64;
-
-            	// Add background alert
-            	background.addAlert(randomBlockX/64);
-
-            	Block block;
-            	block = new Block(randomBlockX, -128, spriteSize, gl); 
-	            blockArray.add(block);    	
+	            camera.update(hero);
+	            background.update(gl);
 	            
-	            temp = nextBlock + 25;
+	            // Add new block 
+	            if(nextBlock % spawnRate == 0) {
+	            	
+	            	// Get random X position for block
+	            	randomBlockX = getRandom(10) * 64;
+	            	randomBlockType = getRandom(100);
+	            	int blockID = (nextBlock/10);
+	
+	            	// Add background alert
+	            	background.addAlert(randomBlockX/64);
+	            	            	
+	            	if(randomBlockType < 60) // Block will be regular 
+	            		block = new Block(randomBlockX, camera.getY()-128, spriteSize, 0, blockID, gl);  
+	            	else  // Block will be a dark block
+	            		block = new Block(randomBlockX, camera.getY()-128, spriteSize, 1, blockID, gl); 
+	  
+	            	blockArray.add(block); 
+		            
+		            temp = nextBlock + 25;
+	            }
 	            
-	            // Add block to grid
-	    		myGrid.addToGrid(randomBlockX/64);
+	            if(nextBlock >= temp) {
+	            	// Remove background alert
+		            background.removeAlert(randomBlockX/64);
+	            }
+	            
+	            // Update items
+	            for(int iA = 0; iA < itemArray.size(); iA++) {
+	        	    if(itemArray.get(iA).isAlive()) { 
+	        	    	if(!itemArray.get(iA).checkRemoval()) // Item is alive
+	        	    		itemArray.get(iA).update(gl);
+	        	    	else // Item is below screen and needs to be removed
+	        	    		itemArray.remove(iA);
+	        	    }
+	        	    else { // Item is dead (from player)
+	        	    	if(itemArray.get(iA).getLifeSpan() > 0) // The player picked the item up
+	        	    		hero.giveItem(itemArray.get(iA).getType()); // Add to player's inventory
+	        	    	itemArray.remove(iA);
+	        	    }
+	            }
+	            
+	            // Update blocks
+	            for(int bA = 0; bA < blockArray.size(); bA++) {
+	        	    if(blockArray.get(bA).isAlive()) { 
+	        	    	if(!blockArray.get(bA).checkRemoval()) // Block is alive
+	        	    		blockArray.get(bA).update(gl);
+	        	    	else // Block is below screen and needs to be removed
+	        	    		blockArray.remove(bA);
+	        	    }
+	        	    else { // Block is dead (from player)
+	        		    if(blockArray.get(bA).getID() % 7 == 0) { // Add random item drop
+	        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 0, blockArray.get(bA).getID(), gl);
+	        		    	itemArray.add(item);
+	        		    } else {
+		        		    if(blockArray.get(bA).getType() == 0) { // Regular block
+		        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 1, blockArray.get(bA).getID(), gl);
+		        		    	itemArray.add(item);
+		        		    }
+		        		    if(blockArray.get(bA).getType() == 1) { // Dark block
+		        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 2, blockArray.get(bA).getID(), gl);
+		        		    	itemArray.add(item);
+		        		    }
+	        		    }
+	        		    
+	        		    clippy.playClip(blockBreak);
+	        	    	blockArray.remove(bA);
+	        	    }
+	            }
+	                     
+	            hero.update(gl);
+	            lava.update(gl, lavaTimer);
+	     	   	
+	     	    intToString = String.valueOf(playerScoreLast);
+	            drawText(gl, "SCORE:" + intToString, 10, camera.getY()+25, camera, spriteSize, false);
+	            drawText(gl, "CAN CARRY:" + hero.getInventorySpace(), 10, camera.getY()+100, camera, spriteSize, false);
+	            drawText(gl, "HEALTH:" + hero.getHP(), 10, camera.getY()+75, camera, spriteSize, false);       
+	            
+	            for(int i = 0; i < 14; i++) {
+	            	intToString = String.valueOf((camera.getY()/64) - ((worldHeight/64)-i-1));
+	            	drawText(gl, intToString, 575, (camera.getY()+67) + (i*64), camera, spriteSize, false);
+	            }
+            } else {
+            	
+            	camera.setY(Main.worldHeight - 960);
+                lava.setY(worldHeight-160);
+                lavaVSP = 4;
+                spawnRate = 100;
+                level = 1;
+                background.reset();
+                
+            	music.stop();
+            	hero.reset();
+            	playerScore = 0;
+            	
+            	for(int i = 0; i < blockArray.size(); i++)
+            		blockArray.remove(i);
+            	
+            	for(int i = 0; i < itemArray.size(); i++)
+            		itemArray.remove(i);
+            	
+            	int[] mySize = new int[2];
+            	mySize[0] = 56;
+            	mySize[1] = 76;
+            	drawText(gl, "GAME OVER", 68, camera.getY()+300, camera, mySize, true);
+            	
+            	drawText(gl, "PRESS ENTER TO RETRY", 200, camera.getY()+400, camera, mySize, false);
+            	
+            	intToString = String.valueOf(playerScoreLast);
+            	mySize[0] = 28;
+            	mySize[1] = 38;
+            	
+            	if(playerScoreLast < 10)
+            		drawText(gl, "SCORE:" + intToString, 222, camera.getY()+500, camera, mySize, true);
+            	else if(playerScoreLast > 0 && playerScoreLast < 100)
+            		drawText(gl, "SCORE:" + intToString, 208, camera.getY()+500, camera, mySize, true);
+            	else
+            		drawText(gl, "SCORE:" + intToString, 194, camera.getY()+500, camera, mySize, true);
+
+            	nextBlock = 0;
             }
-            
-            if(nextBlock >= temp) {
-            	// Remove background alert
-	            background.removeAlert(randomBlockX/64);
-            }
-                           
-            hero.update(gl);
-            lava.update(gl, lavaTimer);
-             
-            /**
-            // Physics update
+            	         
+            // // ---------------------- PHYSICS UPDATE -----------------------
             do {
- 	           // 1. Physics movement
- 	           // 2. Physics collision detection
- 	           // 3. Physics collision resolution
-      
-         	   //hero.update(gl);
+            	hero.checkCollision();
+        		hero.checkCenter();
+        		
+        		for(int iA = 0; iA < itemArray.size(); iA++)
+        			itemArray.get(iA).checkBelow();      	 
+                
+        		for(int bA = 0; bA < blockArray.size(); bA++)
+        			blockArray.get(bA).checkBelow();    
 
                 lastPhysicsFrameMs += physicsDeltaMs;
             } while (lastPhysicsFrameMs + physicsDeltaMs < deltaTimeMS );
-            **/
-            
-            // Game logic goes here.
+                    
+            // ---------------------- GAME UPDATES -----------------------
             if (window.kbState[KeyEvent.VK_ESCAPE]) {
                 shouldExit = true;
             }
@@ -187,7 +295,7 @@ public class Main {
 	
 	        if (window.kbState[KeyEvent.VK_DOWN]) {
 	        	hero.keyDown("down");
-	        }
+	        }     
 	
 	        if (window.kbState[KeyEvent.VK_LEFT]) {
 	        	pressedLeft++;
@@ -208,6 +316,24 @@ public class Main {
 	        if (window.kbState[KeyEvent.VK_Z]) {
 	        	hero.keyDown("z");
 	        }
+	        
+	        if (window.kbState[KeyEvent.VK_SPACE]) {
+	        	pressedSpace++;
+	        	
+	        	if(pressedSpace == 1)
+	        		hero.keyDown("space");
+	        } else
+	        	pressedSpace = 0;
+	        
+	        if (window.kbState[KeyEvent.VK_CONTROL]) {
+	        	hero.ctrlKeyDown(true);
+	        } else
+	        	hero.ctrlKeyDown(false);
+	        
+	        if (window.kbState[KeyEvent.VK_ENTER]) {
+	        	if(isGameOver)
+	        		isGameOver = false;
+	        }
 
             nextBlock++;
             gameTimer = nextBlock;
@@ -218,35 +344,36 @@ public class Main {
 	            	lavaTimer++;
 	            else
 	            	lavaTimer = 0;      
-         
-            if(nextBlock % 100 == 0) {
-            	playerScore += 1;
-            }
+            
+            if(playerScore > playerScoreLast)
+            	playerScoreLast = playerScore;
+            
+            playerScore = (-1) * ((hero.getY()/ 64) - 155);
             
             if(gameTimer % 1000 == 0) {
-            	pow += 1;
-            	//blockVSP = (int) Math.pow(2, pow);
-            }
-            
-            intToString = String.valueOf(playerScore);
-            drawText(gl, "SCORE:" + intToString, 10, 10, camera, spriteSize);
-            
-            drawText(gl, "448", 10, 448, camera, spriteSize);
-            drawText(gl, "512", 10, 512, camera, spriteSize);
-            drawText(gl, "576", 10, 576, camera, spriteSize);
-            drawText(gl, "640", 10, 640, camera, spriteSize);
-            drawText(gl, "704", 10, 704, camera, spriteSize);
-            drawText(gl, "768", 10, 768, camera, spriteSize);
-            drawText(gl, "832", 10, 832, camera, spriteSize);
-            drawText(gl, "896", 10, 896, camera, spriteSize);
-            
-            //System.out.println("diff:     " + Main.getGameTimer() / Main.getGameSpeed());
-            //System.out.println("falldiff: " + blockVSP * (Main.getGameTimer() / Main.getGameSpeed()));
+            	lavaVSP += 1;
+            	level += 1;
+            	
+            	if(spawnRate > 50)
+            		spawnRate -= level*2;
+            	
+            	System.out.println("Spawn: " + spawnRate);
+            }   
         }  
+        
     }
     
-    public static void drawText(GL2 gl, String text, int x, int y, Camera cam, int[] textSize){
-        ArrayList<FontSprite> Text = new ArrayList<>(Font.getTextures(text, x, y, textSize, gl));
+    public static void drawText(GL2 gl, String text, int x, int y, Camera cam, int[] textSize, boolean newSize){
+    	
+    	ArrayList<FontSprite> Text;
+    	
+    	if(!newSize) {
+    		textSize[0] = 12;
+    		textSize[1] = 17;
+    	} 
+    	
+    	Text = new ArrayList<>(Font.getTextures(text, x, y, textSize, gl));
+    	
         for (int i = 0; i < Text.size(); i++){
             DrawSprite(gl, Text.get(i).getImage(), Text.get(i).getX(), Text.get(i).getY(), Text.get(i).getWidth(), Text.get(i).getHeight(), cam);
         }
@@ -255,6 +382,10 @@ public class Main {
     public static int getBlockVSP() {
     	return blockVSP;
     }
+    
+    public static int getLavaVSP() {
+		return lavaVSP;
+	}
     
     public static int getGameTimer() {
     	return gameTimer;

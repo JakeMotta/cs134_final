@@ -12,13 +12,17 @@ public class Camera {
 	public Camera(int width, int height) {
 		w = width;
 		h = height;
+
+		setY(Main.worldHeight - 960);
 	}
 	
 	public void update(Hero hero) {
-		
-		setX((hero.getX()-getWidth()/2)+(hero.getWidth()/2));
-        setY((hero.getY()-getHeight()/2)+(hero.getHeight()/2));
-        
+				
+		if(hero.getY() <= getY() + Main.hero.getGoal())
+			setY(getY()-128);
+		if(hero.getY() > getY() + Main.hero.getGoal())
+			setY(getY()+128);
+				
 		if(getY() > Main.worldHeight-getHeight()-1)
         	setY(Main.worldHeight-getHeight());
         if(getY() < 0)
