@@ -37,6 +37,18 @@ public class Images {
 	// Dummy image
 	public int dummyImg;
 	
+	// Slime images
+	public int slimeRight[] = new int[3];
+	public int slimeLeft[] = new int[3];
+
+	private int slimeRight4;
+	private int slimeRight5;
+	private int slimeRight6;
+	
+	private int slimeLeft4;
+	private int slimeLeft5;
+	private int slimeLeft6;
+	
 	// Item images
 	public int apple;
 	
@@ -116,7 +128,22 @@ public class Images {
 		// Item images
 		apple = Main.glTexImageTGAFile(gl, "Sprites/Items/apple.tga", spriteSize);
 		
+		// Dummy image
 		dummyImg = Main.glTexImageTGAFile(gl, "Sprites/Dummy/Dummy.tga", spriteSize);
+		
+		// Slime images
+		slimeRight[0] = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeRight1.tga", spriteSize);
+		slimeRight[1] = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeRight2.tga", spriteSize);
+		slimeRight[2] = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeRight3.tga", spriteSize);
+		slimeRight4 = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeRight4.tga", spriteSize);
+		slimeRight5 = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeRight5.tga", spriteSize);
+		slimeRight6 = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeRight6.tga", spriteSize);
+		slimeLeft[0] = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeLeft1.tga", spriteSize);
+		slimeLeft[1] = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeLeft2.tga", spriteSize);
+		slimeLeft[2] = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeLeft3.tga", spriteSize);
+		slimeLeft4 = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeLeft4.tga", spriteSize);
+		slimeLeft5 = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeLeft5.tga", spriteSize);
+		slimeLeft6 = Main.glTexImageTGAFile(gl, "Sprites/Slime/slimeLeft6.tga", spriteSize);
 		
 		// Lava images
 		lava = Main.glTexImageTGAFile(gl, "Sprites/Lava/lava.tga", spriteSize);
@@ -185,6 +212,26 @@ public class Images {
 	// Get lava top images
 	public int getLavaTopImage(int num) {
 		image = lavaTop[num];
+		return image;
+	}
+	
+	// Get slime right
+	public int getSlimeRightImage(int num) {
+		switch (num) {
+			case 0: image = slimeRight[0]; break;
+			case 1: image = slimeRight[1]; break;
+			case 2: image = slimeRight[2]; break;
+		}
+		return image;
+	}
+	
+	// Get get slime left
+	public int getSlimeLeftImage(int num) {
+		switch (num) {
+			case 0: image = slimeLeft[0]; break;
+			case 1: image = slimeLeft[1]; break;
+			case 2: image = slimeLeft[2]; break;
+		}
 		return image;
 	}
 

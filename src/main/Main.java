@@ -41,6 +41,7 @@ public class Main {
     public static Images images;
     public static Block block;
     public static Item item;
+    public static Slime slime;
     public static ClipPlayer clippy = new ClipPlayer();
     
     public static int worldWidth;
@@ -78,6 +79,7 @@ public class Main {
         hero = new Hero(512, (worldHeight-256)+blockVSP, spriteSize, gl);
         lava = new Lava(spriteSize, gl, worldHeight-160);
         font = new Font(spriteSize, gl);
+        slime = new Slime(128, (worldHeight-256), spriteSize, gl);
         
         pressedRight = pressedLeft = pressedUp = pressedSpace = 0;
         lastFrameNS = curFrameNS; 
@@ -214,6 +216,7 @@ public class Main {
 	        	    }
 	            }
 	                     
+	            slime.update(gl);
 	            hero.update(gl);
 	            lava.update(gl, lavaTimer);
 	     	   	
