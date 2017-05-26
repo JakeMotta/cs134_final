@@ -158,11 +158,13 @@ public class Main {
 	            	// Add background alert
 	            	background.addAlert(randomBlockX/64);
 	            	            	
-	            	if(randomBlockType < 60) // Block will be regular 
+	            	if(randomBlockType < 60) // Regular block
 	            		block = new Block(randomBlockX, camera.getY()-128, spriteSize, 0, blockID, gl);  
-	            	else  // Block will be a dark block
+	            	else if(randomBlockType >= 60 && randomBlockType < 90)  // Dark block
 	            		block = new Block(randomBlockX, camera.getY()-128, spriteSize, 1, blockID, gl); 
-	  
+	            	else // Red block
+	            		block = new Block(randomBlockX, camera.getY()-128, spriteSize, 2, blockID, gl); 
+	            	
 	            	blockArray.add(block); 
 		            
 		            temp = nextBlock + 25;
@@ -197,47 +199,37 @@ public class Main {
 	        	    		blockArray.remove(bA);
 	        	    }
 	        	    else { // Block is dead (from player)
-	        		    if(blockArray.get(bA).getID() % 7 == 0) { // Add random item drop
-	        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 0, blockArray.get(bA).getID(), gl);
-	        		    	itemArray.add(item);
-	        		    } else {
-		        		    if(blockArray.get(bA).getType() == 0) { // Regular block
-		        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 1, blockArray.get(bA).getID(), gl);
-		        		    	itemArray.add(item);
-		        		    }
-		        		    if(blockArray.get(bA).getType() == 1) { // Dark block
-		        		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 2, blockArray.get(bA).getID(), gl);
-		        		    	itemArray.add(item);
-		        		    }
-	        		    }
-	        		    
+	        	    	if(blockArray.get(bA).getType() != 2)
+	        	    		dropItem(bA, gl);
+	        	    	else
+	        	    		explosion(bA, gl);
+	        	    	
 	        		    clippy.playClip(blockBreak);
-	        	    	blockArray.remove(bA);
 	        	    }
 	            }
-	                     
+
 	            slime.update(gl);
 	            hero.update(gl);
 	            lava.update(gl, lavaTimer);
-	     	   	
+
 	     	    intToString = String.valueOf(playerScoreLast);
 	            drawText(gl, "SCORE:" + intToString, 10, camera.getY()+25, camera, spriteSize, false);
 	            drawText(gl, "CAN CARRY:" + hero.getInventorySpace(), 10, camera.getY()+100, camera, spriteSize, false);
 	            drawText(gl, "HEALTH:" + hero.getHP(), 10, camera.getY()+75, camera, spriteSize, false);       
-	            
+
 	            for(int i = 0; i < 14; i++) {
 	            	intToString = String.valueOf((camera.getY()/64) - ((worldHeight/64)-i-1));
 	            	drawText(gl, intToString, 575, (camera.getY()+67) + (i*64), camera, spriteSize, false);
 	            }
             } else {
-            	
+
             	camera.setY(Main.worldHeight - 960);
                 lava.setY(worldHeight-160);
                 lavaVSP = 4;
                 spawnRate = 100;
                 level = 1;
                 background.reset();
-                
+
             	music.stop();
             	hero.reset();
             	playerScore = 0;
@@ -380,6 +372,29 @@ public class Main {
         for (int i = 0; i < Text.size(); i++){
             DrawSprite(gl, Text.get(i).getImage(), Text.get(i).getX(), Text.get(i).getY(), Text.get(i).getWidth(), Text.get(i).getHeight(), cam);
         }
+    }
+    
+    public static void explosion(int bA, GL2 gl) {
+    	 if(blockArray.get(bA).getType() == 2) // Red block
+		    	blockArray.get(bA).explode(bA, gl);
+    }
+    
+    public static void dropItem(int bA, GL2 gl) {
+    	if(blockArray.get(bA).getID() % 7 == 0) { // Add random item drop
+	    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 0, blockArray.get(bA).getID(), gl);
+	    	itemArray.add(item);
+	    } else {
+		    if(blockArray.get(bA).getType() == 0) { // Regular block
+		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 1, blockArray.get(bA).getID(), gl);
+		    	itemArray.add(item);
+		    }
+		    if(blockArray.get(bA).getType() == 1) { // Dark block
+		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 2, blockArray.get(bA).getID(), gl);
+		    	itemArray.add(item);
+		    }		   
+	    }
+    	
+    	blockArray.remove(bA);
     }
     
     public static int getBlockVSP() {

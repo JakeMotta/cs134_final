@@ -11,6 +11,7 @@ public class Images {
 	// Block images
 	private int blockImg;
 	private int blockImg2;
+	private int blockImg3;
 	public int blockImg_icon;
 	public int blockImg2_icon;
 	private int bd1;
@@ -33,6 +34,16 @@ public class Images {
 	private int dbd8;
 	private int dbd9;
 	private int dbd10;
+	private int rbd1;
+	private int rbd2;
+	private int rbd3;
+	private int rbd4;
+	private int rbd5;
+	private int rbd6;
+	private int rbd7;
+	private int rbd8;
+	private int rbd9;
+	private int rbd10;
 	
 	// Dummy image
 	public int dummyImg;
@@ -102,8 +113,11 @@ public class Images {
 		// Block images
 		blockImg = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block1.tga", spriteSize);
 		blockImg2 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block2.tga", spriteSize);
+		blockImg3 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block3.tga", spriteSize);
 		blockImg_icon = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block1_icon.tga", spriteSize);
 		blockImg2_icon = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block2_icon.tga", spriteSize);
+		
+		// Normal block
 		bd1 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd1.tga", spriteSize);
 		bd2 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd2.tga", spriteSize);
 		bd3 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd3.tga", spriteSize);
@@ -113,6 +127,9 @@ public class Images {
 		bd7 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd7.tga", spriteSize);
 		bd8 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd8.tga", spriteSize);
 		bd9 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd9.tga", spriteSize);
+		bd10 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd10.tga", spriteSize);
+		
+		// Dark block
 		bd10 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/bd10.tga", spriteSize);
 		dbd1 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/dbd1.tga", spriteSize);
 		dbd2 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/dbd2.tga", spriteSize);
@@ -124,6 +141,18 @@ public class Images {
 		dbd8 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/dbd8.tga", spriteSize);
 		dbd9 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/dbd9.tga", spriteSize);
 		dbd10 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/dbd10.tga", spriteSize);
+		
+		// Red block
+		rbd1 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/rbd1.tga", spriteSize);
+		rbd2 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/rbd2.tga", spriteSize);
+		rbd3 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/rbd3.tga", spriteSize);
+		rbd4 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/rbd4.tga", spriteSize);
+		rbd5 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/rbd5.tga", spriteSize);
+		rbd6 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/rbd6.tga", spriteSize);
+		rbd7 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/rbd7.tga", spriteSize);
+		rbd8 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/rbd8.tga", spriteSize);
+		rbd9 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/rbd9.tga", spriteSize);
+		rbd10 = Main.glTexImageTGAFile(gl, "Sprites/Blocks/rbd10.tga", spriteSize);
 		
 		// Item images
 		apple = Main.glTexImageTGAFile(gl, "Sprites/Items/apple.tga", spriteSize);
@@ -238,39 +267,17 @@ public class Images {
 	// Get different block images
 	public int getBlockImage(int num) {
 		switch (num) {
-			case 100:
-				image = blockImg;
-				break;
-			case 99:
-				image = bd1;
-				break;
-			case 90:
-				image = bd2;
-				break;
-			case 80:
-				image = bd3;
-				break;
-			case 70:
-				image = bd4;
-				break;
-			case 60:
-				image = bd5;
-				break;
-			case 50:
-				image = bd6;
-				break;
-			case 40:
-				image = bd7;
-				break;
-			case 30:
-				image = bd8;
-				break;
-			case 20:
-				image = bd9;
-				break;
-			case 10:
-				image = bd10;
-				break;
+			case 100:image = blockImg; break;
+			case 99: image = bd1; break;
+			case 90: image = bd2; break;
+			case 80: image = bd3; break;
+			case 70: image = bd4; break;
+			case 60: image = bd5; break;
+			case 50: image = bd6; break;
+			case 40: image = bd7; break;
+			case 30: image = bd8; break;
+			case 20: image = bd9; break;
+			case 10: image = bd10; break;
     	}
 		return image;
 	}
@@ -278,41 +285,38 @@ public class Images {
 	// Get different block images
 	public int getDarkBlockImage(int num) {
 		switch (num) {
-			case 100:
-				image = blockImg2;
-				break;
-			case 99:
-				image = dbd1;
-				break;
-			case 90:
-				image = dbd2;
-				break;
-			case 80:
-				image = dbd3;
-				break;
-			case 70:
-				image = dbd4;
-				break;
-			case 60:
-				image = dbd5;
-				break;
-			case 50:
-				image = dbd6;
-				break;
-			case 40:
-				image = dbd7;
-				break;
-			case 30:
-				image = dbd8;
-				break;
-			case 20:
-				image = dbd9;
-				break;
-			case 10:
-				image = dbd10;
-				break;
-	   	}
+			case 100:image = blockImg2; break;
+			case 99: image = dbd1; break;
+			case 90: image = dbd2; break;
+			case 80: image = dbd3; break;
+			case 70: image = dbd4; break;
+			case 60: image = dbd5; break;
+			case 50: image = dbd6; break;
+			case 40: image = dbd7; break;
+			case 30: image = dbd8; break;
+			case 20: image = dbd9; break;
+			case 10: image = dbd10; break;
+    	}
 		return image;
 	}
+	
+	// Get different block images
+	public int getRedBlockImage(int num) {
+		switch (num) {
+			case 100:image = blockImg3; break;
+			case 99: image = rbd1; break;
+			case 90: image = rbd2; break;
+			case 80: image = rbd3; break;
+			case 70: image = rbd4; break;
+			case 60: image = rbd5; break;
+			case 50: image = rbd6; break;
+			case 40: image = rbd7; break;
+			case 30: image = rbd8; break;
+			case 20: image = rbd9; break;
+			case 10: image = rbd10; break;
+	    }
+		return image;
+	}
+	
 		
 }
