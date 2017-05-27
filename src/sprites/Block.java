@@ -19,6 +19,7 @@ public class Block extends Sprite {
 	private int myID = 0;
 	
 	public Dummy floorDummy; // Used for floor detection
+	public Dummy boomDummy; // Used for big booms
 
 	public Block(int myX, int myY, int[] spriteSize, int num, int id, GL2 gl) {
 		super(myX, myY, spriteSize, gl);
@@ -28,6 +29,7 @@ public class Block extends Sprite {
 		myID = id;
 		
 		floorDummy = new Dummy(0,0,spriteSize,gl);
+		boomDummy = new Dummy(0,0,spriteSize,gl);
 		
 		switch(type) {
 			case 0: // Regular block
@@ -35,6 +37,9 @@ public class Block extends Sprite {
 				break;
 			case 1: // Dark block
 				currentImage = Main.images.getDarkBlockImage(hp);
+				break;
+			case 2: // Red block
+				currentImage = Main.images.getRedBlockImage(hp);
 				break;
 		}
 	}
@@ -49,7 +54,7 @@ public class Block extends Sprite {
 		else {
 			onGroundTimer++;
 		}
-		
+				
 		checkVSP();
 		checkMined();		
 		 
@@ -61,6 +66,10 @@ public class Block extends Sprite {
 			case 1: // Dark block
 				//floorDummy.update(gl);
 				setImage(Main.images.getDarkBlockImage(hp));
+				break;
+			case 2: // Red block
+				//floorDummy.update(gl);
+				setImage(Main.images.getRedBlockImage(hp));
 				break;
 		}
 		
@@ -80,6 +89,7 @@ public class Block extends Sprite {
 						hp -= 9;
 					else
 						hp -= 10;
+					
 					miningTimer = 0;
 				}
 			}
@@ -156,4 +166,24 @@ public class Block extends Sprite {
 		return onGroundTimer;
 	}
 
+	// Big boom!
+	public void explode(int thisBlock, GL2 gl) {
+		boomDummy.setWidth(192);
+		boomDummy.setHeight(192);
+		boomDummy.setX(getX()+64);
+		boomDummy.setY(getY()+64);
+		
+		for(int i = 0; i < Main.blockArray.size(); i++) {		
+			if(Main.Dummy_Collision(boomDummy, Main.blockArray.get(i))) {
+				if(Main.blockArray.get(i).getID() != myID) {
+					if(Main.blockArray.get(i).getType() != 2)
+						Main.dropItem(i, gl);
+	    	    	else
+	    	    		Main.explosion(i, gl);
+				}
+			}
+		}
+		Main.blockArray.remove(thisBlock);
+		//Main.hero.setHP(Main.hero.getHeight() - 25);
+	}
 }
