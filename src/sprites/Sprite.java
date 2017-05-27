@@ -9,7 +9,11 @@ public class Sprite {
 	protected int x, y, width, height, image;
 	protected String direction, shape;
 	protected int speed, vsp, hsp, gravity;
-	protected boolean isAlive, shouldMove, isGrounded, canMoveRight, canMoveLeft, canJump;
+	protected boolean isAlive, shouldMove;
+	public boolean isGrounded;
+	protected boolean canMoveRight;
+	protected boolean canMoveLeft;
+	protected boolean canJump;
 	
 	protected int gravityTimer = 0;
 	public Sprite(int myX, int myY, int[] spriteSize, GL2 gl) {

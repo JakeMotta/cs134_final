@@ -215,22 +215,20 @@ public class Images {
 		return image;
 	}
 	
-	// Get slime right
-	public int getSlimeRightImage(int num) {
-		switch (num) {
-			case 0: image = slimeRight[0]; break;
-			case 1: image = slimeRight[1]; break;
-			case 2: image = slimeRight[2]; break;
-		}
-		return image;
-	}
-	
-	// Get get slime left
-	public int getSlimeLeftImage(int num) {
-		switch (num) {
+	// Get slime movements
+	public int getSlimeWalk(String dir, int num) {
+		if(dir == "right") { // Right movement
+			switch (num) {
+				case 0: image = slimeRight[0]; break;
+				case 1: image = slimeRight[1]; break;
+				case 2: image = slimeRight[2]; break;
+			}
+		} else { // Left movement
+			switch (num) {
 			case 0: image = slimeLeft[0]; break;
 			case 1: image = slimeLeft[1]; break;
 			case 2: image = slimeLeft[2]; break;
+			}
 		}
 		return image;
 	}

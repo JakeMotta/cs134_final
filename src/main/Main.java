@@ -79,7 +79,7 @@ public class Main {
         hero = new Hero(512, (worldHeight-256)+blockVSP, spriteSize, gl);
         lava = new Lava(spriteSize, gl, worldHeight-160);
         font = new Font(spriteSize, gl);
-        slime = new Slime(128, (worldHeight-256), spriteSize, gl);
+        slime = new Slime(320, (worldHeight-512), spriteSize, gl);
         
         pressedRight = pressedLeft = pressedUp = pressedSpace = 0;
         lastFrameNS = curFrameNS; 
@@ -141,7 +141,7 @@ public class Main {
             			e.printStackTrace();
             		}
                     
-                    music.start();
+                    //music.start();
             	}
             	
 	            camera.update(hero);
@@ -271,9 +271,10 @@ public class Main {
             	         
             // // ---------------------- PHYSICS UPDATE -----------------------
             do {
+            	
             	hero.checkCollision();
         		hero.checkCenter();
-        		
+          
         		for(int iA = 0; iA < itemArray.size(); iA++)
         			itemArray.get(iA).checkBelow();      	 
                 
@@ -288,6 +289,7 @@ public class Main {
                 shouldExit = true;
             }
 
+            
             if (window.kbState[KeyEvent.VK_UP]) {   
             	pressedUp++;
             	
@@ -295,7 +297,7 @@ public class Main {
             		hero.keyDown("up");
 	        } else
 	        	pressedUp = 0;
-	
+			
 	        if (window.kbState[KeyEvent.VK_DOWN]) {
 	        	hero.keyDown("down");
 	        }     
