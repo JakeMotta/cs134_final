@@ -183,6 +183,7 @@ public class Block extends Sprite {
 				}
 			}
 		}
+		System.out.println("boom");
 		Main.blockArray.remove(thisBlock);
 		//Main.hero.setHP(Main.hero.getHeight() - 25);
 	}

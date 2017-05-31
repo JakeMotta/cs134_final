@@ -49,7 +49,7 @@ public class Hero extends Sprite implements Actor {
     private int blockHitTimer = 0;
     private int level = 1;
     private int goal = 480;
-
+    
     public Dummy dummy; // Used for player collision and mining collision
     public Dummy floorDummy; // Used for floor detection
     public Dummy myDummy; // Used for knowing when a block is on-top of us
@@ -141,7 +141,6 @@ public class Hero extends Sprite implements Actor {
 
 		//dummy.update(gl);
 		//myDummy.update(gl);
-		//floorDummy.update(gl);
 		
 		checkVSP();
 		checkMining();
@@ -157,8 +156,6 @@ public class Hero extends Sprite implements Actor {
 			gravityInc = 20;
 			gravityTimer = 0;
 		}
-		
-		System.out.println("isGrounded: " + isGrounded);
 		
 		if (shouldMove) {
 			
@@ -185,9 +182,17 @@ public class Hero extends Sprite implements Actor {
 	    draw(gl);
 	}
 	
-	public int getGoal() { return goal;	}
-	public void setHP(int dmg) { hp -= dmg; }
-	public int getHP() { return hp; }
+	public int getGoal() {
+		return goal;
+	}
+
+	public void setHP(int dmg) {
+		hp -= dmg;
+	}
+	
+	public int getHP() {
+		return hp;
+	}
 	
 	public void blockHit() {
 		if(!checkCenter()) {
@@ -296,12 +301,17 @@ public class Hero extends Sprite implements Actor {
 	public void checkVSP() {
 		vsp = Main.getBlockVSP();
 	}
-
+	
+	public void sink() {
+		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 
+			moveY(vsp);	
+	}
+	
 	public void checkCollision() {			
-		floorDummy.setWidth(58);
+		floorDummy.setWidth(60);
 		floorDummy.setHeight(60);
-		floorDummy.setX(getX()+4);
-		floorDummy.setY(getY()+4);
+		floorDummy.setX(getX()+2);
+		floorDummy.setY(getY()+height-2);
 		
 		for(int i = 0; i < Main.blockArray.size(); i++) {		
 			if(Main.Dummy_Collision(floorDummy, Main.blockArray.get(i))) {
@@ -311,6 +321,7 @@ public class Hero extends Sprite implements Actor {
 			} else {
 				isGrounded = false;
 				canJump = false;
+				jumpCounter = 0;
 			}
 		}
 	}

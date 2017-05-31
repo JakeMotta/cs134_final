@@ -26,6 +26,12 @@ public class Slime extends Sprite {
 	private boolean isGrounded = false;
 	private boolean playMovement = false;
 	private int gravityInc = 5;
+	private int waitTimer = Main.getRandom(200);
+	private int wanderRange = Main.getRandom(200);
+	private int randDirection = Main.getRandom(1);
+	private boolean shouldRoam = false;
+	public boolean deathAnimation = false;
+	public int deathCounter = 0;
 	
 	 public Dummy dummy; // Used for player collision and mining collision
 	 public Dummy floorDummy; // Used for floor detection
@@ -49,58 +55,138 @@ public class Slime extends Sprite {
 			isAlive = false;
 		}
 		
-		floorDummy.update(gl);
-		myDummy.update(gl);
-		
-		checkCenter();
-		checkCollision();
-		
-		if(!isGrounded)
-			fall();
-		else {
-			onGroundTimer++;
+		if(!deathAnimation) { // If not playing death animation
 			
-			checkHero();
-
-			if(heroFound && playMovement) { // Hero within target distance
-				// Play walking animation
-			    if (walkCounter >= (fps*Main.images.slimeRight.length)-2)
-			        walkCounter = -1;
-			    else
-			        walkCounter++;
+			floorDummy.update(gl);
+			myDummy.update(gl);
 			
-			    if(walkCounter % fps == 0) {
-			    	currentImage = Main.images.getSlimeWalk(direction, walkCounter/fps);
-			    }
+			checkCenter();
+			checkCollision();
+			checkLava();
+			
+			if(!isGrounded)
+				fall();
+			else {
+				onGroundTimer++;
+				
+				checkHero();
+				System.out.println("heroFound: " + heroFound);
+				if(heroFound) {
+					
+				} else {
+					if(!shouldRoam)
+						roamWait();
+					else
+						roam();
+					
+					
+				}
+	
+				if(playMovement) { // Hero within target distance
+					// Play walking animation
+				    if (walkCounter >= (fps*Main.images.slimeRight.length)-2)
+				        walkCounter = -1;
+				    else
+				        walkCounter++;
+				
+				    if(walkCounter % fps == 0) {
+				    	currentImage = Main.images.getSlimeWalk(direction, walkCounter/fps);
+				    }
+				}
 			}
+		} else {
+			// Play walking animation
+		    if (deathCounter >= (fps*Main.images.slimeDeathRight.length)-2)
+		    	isAlive = false;
+		    else
+		    	deathCounter++;
+		
+		    if(deathCounter % fps == 0) {
+		    	currentImage = Main.images.getSlimeDeath(direction, deathCounter/fps);
+		    }
 		}
-		//System.out.println("isGrounded: " + isGrounded);
+		
 		setImage(currentImage);
 		draw(gl);
+	}
+	
+	public void checkLava() {
+		if(getY() > Main.lava.getY()-10) {
+			deathAnimation = true;
+		}
+	}
+	
+	public void roamWait() {
+		waitTimer--;
+		shouldRoam = false;
+		moveNone();
+		
+		if(waitTimer <= 0 && !heroFound) {
+			waitTimer = Main.getRandom(200);
+			shouldRoam = true;
+			if(Main.getRandom(2) == 0)
+				direction = "left";
+			else
+				direction = "right";
+		}
+	}
+	
+	public void roam() {
+		wanderRange--;
+		
+		if(wanderRange > 0 && !heroFound) {
+			if(direction == "left")
+				moveLeft();
+			else
+				moveRight();
+		} else {
+			wanderRange = Main.getRandom(200);
+			shouldRoam = false;
+			roamWait();
+		}
+	}
+	
+	public void moveLeft() {
+		if(getX() > 0) {
+			direction = "left";
+			moveX(-hsp);
+			playMovement = true;
+		} else {
+			shouldRoam = false;
+		}
+	}
+	
+	public void moveRight() {
+		if(getX() < 640-width) {
+			direction = "right";
+			moveX(hsp);
+			playMovement = true;
+		} else {
+			shouldRoam = false;
+		}
+	}
+	
+	public void moveNone() {
+		playMovement = false;
+		currentImage = Main.images.getSlimeWalk(direction, 0);
 	}
 	
 	public void checkHero() {
 		// Check if hero is within detection range
 		if((getX() + hSight) >= Main.hero.getX() && (getX() - hSight) <= Main.hero.getX()) {
 			heroFound = true;
+			shouldRoam = false;
 			
-			if(getX() == Main.hero.getX()) { // Slime is at the same location
-				playMovement = false;
-				currentImage = Main.images.getSlimeWalk(direction, 0);
-			} else {
-				playMovement = true;
-				
-				if(Main.hero.getX() < getX()) { // Hero left of slime
-					direction = "left";
-					moveX(-hsp);
-				} else { // Hero right of slime
-					direction = "right";
-					moveX(hsp);
-				}
+			if(getX() == Main.hero.getX()) // Slime is at the same location
+				moveNone();
+			else {
+				if(Main.hero.getX() < getX()) // Hero left of slime
+					moveLeft();
+				else // Hero right of slime
+					moveRight();
 			}
 		} else { // Hero not detected
 			heroFound = false;
-			currentImage = Main.images.getSlimeWalk(direction, 0);
 		}
 	}
 	

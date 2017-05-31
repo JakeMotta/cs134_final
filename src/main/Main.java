@@ -48,12 +48,14 @@ public class Main {
     public static int worldHeight;
     public static int gameTimer = 0;
     public static int gameSpeed = 100;
+    
     public static int blockVSP = 4;
     public static int lavaVSP = 4;
     public static int playerScore = 0;
     public static String intToString = "";
     public static ArrayList<Block> blockArray = new ArrayList<Block>();
     public static ArrayList<Item> itemArray = new ArrayList<Item>();
+    public static ArrayList<Slime> slimeArray = new ArrayList<Slime>();
     public static String collisionResult = "";
     public static int pressedRight, pressedLeft, pressedUp, pressedSpace;
     public static boolean isGameOver = true;
@@ -79,7 +81,9 @@ public class Main {
         hero = new Hero(512, (worldHeight-256)+blockVSP, spriteSize, gl);
         lava = new Lava(spriteSize, gl, worldHeight-160);
         font = new Font(spriteSize, gl);
-        slime = new Slime(320, (worldHeight-512), spriteSize, gl);
+        
+        slimeArray.add(slime = new Slime(320, (worldHeight-512), spriteSize, gl));
+        
         
         pressedRight = pressedLeft = pressedUp = pressedSpace = 0;
         lastFrameNS = curFrameNS; 
@@ -141,7 +145,7 @@ public class Main {
             			e.printStackTrace();
             		}
                     
-                    //music.start();
+                    music.start();
             	}
             	
 	            camera.update(hero);
@@ -207,8 +211,18 @@ public class Main {
 	        		    clippy.playClip(blockBreak);
 	        	    }
 	            }
+	            
+	        	// Update slimes
+	            for(int sA = 0; sA < slimeArray.size(); sA++) {
+	        	    if(slimeArray.get(sA).isAlive())
+	        	    		slimeArray.get(sA).update(gl);
+	        	    else { // Block is dead (from player)
+	        	    	slimeArray.remove(sA);
+	        	    	
+	        		    //clippy.playClip(blockBreak);
+	        	    }
+	            }
 
-	            slime.update(gl);
 	            hero.update(gl);
 	            lava.update(gl, lavaTimer);
 
