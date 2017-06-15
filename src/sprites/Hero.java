@@ -1,8 +1,6 @@
 package sprites;
-import com.jogamp.newt.event.KeyEvent;
-import com.jogamp.opengl.GL2;
 
-import background.Background;
+import com.jogamp.opengl.GL2;
 import main.Main;
 
 public class Hero extends Sprite implements Actor {
@@ -47,7 +45,6 @@ public class Hero extends Sprite implements Actor {
     private int inventorySpace = 3;
     private int hp = 100;
     private int blockHitTimer = 0;
-    private int level = 1;
     private int goal = 480;
     
     public Dummy dummy; // Used for player collision and mining collision

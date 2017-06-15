@@ -43,16 +43,14 @@ public class Block extends Sprite {
 	}
 	
 	public void update(GL2 gl) {
-		if(hp <= 0) {
+		if(hp <= 0) 
 			isAlive = false;
-		}
-		
+
 		if(shouldFall)
 			fall();
-		else {
+		else 
 			onGroundTimer++;
-		}
-						
+				
 		checkVSP();
 		checkMined();		
 		
@@ -94,25 +92,7 @@ public class Block extends Sprite {
 		}
 	}
 
-	public void checkVSP() {
-		vsp = Main.getBlockVSP();
-	}
 	
-	public void fall() {
-		moveY(vsp);
-	}
-	
-	public int getType() {
-		return type;
-	}
-	
-	public int getID() {
-		return myID;
-	}
-	
-	public void setShouldFall(boolean fall) {
-		shouldFall = fall;
-	}
 
 	public void checkBelow() {
 		// If block is at the bottom of the screen
@@ -140,15 +120,15 @@ public class Block extends Sprite {
 			remove = true;	
 	}
 	
-	public boolean checkRemoval() {
-		return remove;
-	}
 	
-	public int getHP() {
-		return hp;
-	}
+	public int getHP() { return hp; }
+	public int getOnGroundTimer() { return onGroundTimer; }
+	public int getType() { return type; }
+	public int getID() { return myID; }
 	
-	public int getOnGroundTimer() {
-		return onGroundTimer;
-	}
+	public boolean checkRemoval() { return remove; }
+	
+	public void setShouldFall(boolean fall) { shouldFall = fall; }
+	public void checkVSP() { vsp = Main.getBlockVSP(); }
+	public void fall() { moveY(vsp); }
 }

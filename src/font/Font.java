@@ -6,7 +6,6 @@ import com.jogamp.opengl.GL2;
 
 import main.Main;
 import sprites.FontSprite;
-import sprites.Sprite;
 
 public class Font {
 	

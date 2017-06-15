@@ -2,12 +2,9 @@ package background;
 import com.jogamp.opengl.GL2;
 
 import main.Main;
-import sprites.Sprite;
 
 public class Lava {
 	
-	private int x;
-    private int y;
     private int width;
     private int height;
     private int image;
@@ -45,15 +42,7 @@ public class Lava {
 			{0, 0, 0, 0, 0},
 		};
 	}
-	
-	public int getY() {
-		return myY;
-	}
-	
-	public void setY(int incY) {
-		myY = incY;
-	}
-	
+
 	public void update(GL2 gl, int timer) {
 		
 		checkVSP();
@@ -80,9 +69,9 @@ public class Lava {
         }
 	}
 	
-	public void checkVSP() {
-		vsp = Main.getLavaVSP();
-	}
+	public void checkVSP() { vsp = Main.getLavaVSP(); }
+	public int getY() { return myY; }
+	public void setY(int incY) { myY = incY; }
 	
 	public void rise() {
 		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 

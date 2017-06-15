@@ -1,8 +1,7 @@
 package background;
-import com.jogamp.opengl.GL2;
 
+import com.jogamp.opengl.GL2;
 import main.Main;
-import sprites.Sprite;
 
 public class Background {
 	

@@ -1,11 +1,5 @@
 package sprites;
 
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import com.jogamp.opengl.GL2;
 
 import main.Main;

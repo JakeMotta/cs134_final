@@ -9,13 +9,13 @@ public class Item extends Sprite {
 	public int currentImage;
 	
 	private boolean shouldFall = true;
+	private boolean remove = false;
+	public boolean isCollected = false;
 	
 	private int vsp = Main.getBlockVSP();
-	private boolean remove = false;
 	private int onGroundTimer = 0;
 	private int type = 0;
 	private int myID = 0;
-	public boolean isCollected = false;
 	private int lifeSpan = 500;
 	
 	public Dummy floorDummy; // Used for floor detection
@@ -78,39 +78,10 @@ public class Item extends Sprite {
 			isAlive = false;
 	}
 	
-	public int getLifeSpan() {
-		return lifeSpan;
-	}
-	
 	public void checkCollected() {
 		if(Main.Dummy_Collision(Main.hero.myDummy, this)) {
 			isCollected = true;
 		} 
-	}
-
-	public void checkVSP() {
-		vsp = Main.getBlockVSP();
-	}
-	
-	public void sink() {
-		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 
-			moveY(vsp);	
-	}
-	
-	public void fall() {
-		moveY(vsp);
-	}
-	
-	public int getType() {
-		return type;
-	}
-	
-	public int getID() {
-		return myID;
-	}
-	
-	public void setShouldFall(boolean fall) {
-		shouldFall = fall;
 	}
 
 	public void checkBelow() {
@@ -139,12 +110,14 @@ public class Item extends Sprite {
 			remove = true;	
 	}
 	
-	public boolean checkRemoval() {
-		return remove;
-	}
+	public int getType() { return type; }
+	public int getID() { return myID; }
+	public int getOnGroundTimer() { return onGroundTimer; }
+	public int getLifeSpan() { return lifeSpan; }
 	
-	public int getOnGroundTimer() {
-		return onGroundTimer;
-	}
-
+	public boolean checkRemoval() { return remove; }
+	
+	public void setShouldFall(boolean fall) { shouldFall = fall; }
+	public void checkVSP() { vsp = Main.getBlockVSP(); }
+	public void fall() { moveY(vsp); }
 }

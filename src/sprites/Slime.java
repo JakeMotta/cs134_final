@@ -7,14 +7,11 @@ import main.Main;
 public class Slime extends Sprite {
 
 	public int currentImage;
-	
-	private boolean shouldFall = true;
-	
+		
 	private int hp = 100;
 	private int vsp = Main.getBlockVSP();
 	private boolean remove = false;
 	private int onGroundTimer = 0;
-	private int miningTimer = 0;
 	private int type = 0;
 	private int myID = 0;
 	private int walkCounter = 0;
@@ -28,7 +25,6 @@ public class Slime extends Sprite {
 	private int gravityInc = 5;
 	private int waitTimer = Main.getRandom(200);
 	private int wanderRange = Main.getRandom(200);
-	private int randDirection = Main.getRandom(1);
 	private boolean shouldRoam = false;
 	public boolean deathAnimation = false;
 	public int deathCounter = 0;
@@ -51,15 +47,11 @@ public class Slime extends Sprite {
 	}
 	
 	public void update(GL2 gl) {
-		if(hp <= 0) {
+		if(hp <= 0) 
 			isAlive = false;
-		}
 		
 		if(!deathAnimation) { // If not playing death animation
-			
-			//floorDummy.update(gl);
-			//myDummy.update(gl);
-			
+
 			checkCenter();
 			checkCollision();
 			checkLava();
@@ -78,8 +70,6 @@ public class Slime extends Sprite {
 						roamWait();
 					else
 						roam();
-					
-					
 				}
 	
 				if(playMovement) { // Hero within target distance
@@ -260,7 +250,6 @@ public class Slime extends Sprite {
 	}
 	
 	public boolean checkAbove() {
-		
 		if(checkCenter()) { // No block on character
 			dummy.setWidth(32);
 			dummy.setHeight(62);
@@ -286,40 +275,12 @@ public class Slime extends Sprite {
 		return true;
 	}
 	
-	public void checkVSP() {
-		vsp = Main.getBlockVSP();
-	}
-
-	public void fall() {
-		moveY(vsp);
-	}
-	
-	public int getType() {
-		return type;
-	}
-	
-	public int getID() {
-		return myID;
-	}
-	
-	public void setShouldFall(boolean fall) {
-		shouldFall = fall;
-	}
-	
-	public boolean checkRemoval() {
-		return remove;
-	}
-	
-	public void setHP(int dmg) {
-		hp -= dmg;
-	}
-	
-	public int getHP() {
-		return hp;
-	}
-	
-	public int getOnGroundTimer() {
-		return onGroundTimer;
-	}
-
+	public void checkVSP() { vsp = Main.getBlockVSP(); }
+	public void fall() { moveY(vsp); }
+	public int getType() { return type;	}
+	public int getID() { return myID; }
+	public boolean checkRemoval() { return remove; }
+	public void setHP(int dmg) { hp -= dmg; }
+	public int getHP() { return hp; }
+	public int getOnGroundTimer() { return onGroundTimer; }
 }

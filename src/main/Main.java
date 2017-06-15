@@ -1,6 +1,5 @@
 package main;
 
-import com.jogamp.nativewindow.WindowClosingProtocol;
 import com.jogamp.opengl.*;
 
 import Camera.Camera;
@@ -12,17 +11,14 @@ import font.Font;
 import sound.ClipPlayer;
 
 import com.jogamp.newt.event.KeyEvent;
-import com.jogamp.newt.event.KeyListener;
-import com.jogamp.newt.opengl.GLWindow;
 
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.imageio.ImageIO;
 
 public class Main {
 	
@@ -58,7 +54,8 @@ public class Main {
     public static ArrayList<Item> itemArray = new ArrayList<Item>();
     public static ArrayList<Slime> slimeArray = new ArrayList<Slime>();
     public static String collisionResult = "";
-    public static int pressedRight, pressedLeft, pressedUp, pressedSpace;
+    public static int pressedRight, pressedLeft, pressedUp, pressedSpace, volumeUp, volumeDown, noVolume;
+    public static boolean isMuted = false;
     public static boolean isGameOver = true;
     public static int playerScoreLast = 0;
     public static int level = 1;
@@ -89,7 +86,7 @@ public class Main {
         slimeArray.add(slime = new Slime(320, (worldHeight-512), spriteSize, gl));
         
         
-        pressedRight = pressedLeft = pressedUp = pressedSpace = 0;
+        pressedRight = pressedLeft = pressedUp = pressedSpace = volumeUp = volumeDown = noVolume = 0;
         lastFrameNS = curFrameNS; 
         curFrameNS = System.nanoTime();
         long deltaTimeMS = (curFrameNS - lastFrameNS) / 1000000;
@@ -104,13 +101,18 @@ public class Main {
 		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
 			e.printStackTrace();
 		}
- 
+        
+        float volumeLevel = 0, lastVolume = 0;
+        FloatControl gainControl = (FloatControl) music.getControl(FloatControl.Type.MASTER_GAIN);;
+        volumeLevel = gainControl.getValue()-15;
+        
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
         int lastPhysicsFrameMs = 0;
-        int nextBlock = 0, randomBlockX = 0, randomBlockType = 0, temp = 0, pow = 0;
+        int nextBlock = 0, randomBlockX = 0, randomBlockType = 0, temp = 0;
         int lavaTimer = 0;
         int spawnRate = 100;
+        
         
         while (!shouldExit) {
 
@@ -154,6 +156,7 @@ public class Main {
             	            	
 	            camera.update(hero);
 	            background.update(gl);
+	            
 	            
 	            // Add new block 
 	            if(nextBlock % spawnRate == 0) {
@@ -349,7 +352,46 @@ public class Main {
 	        	if(isGameOver)
 	        		isGameOver = false;
 	        }
-
+	        
+	        // Add volume
+	        if (window.kbState[KeyEvent.VK_1]) {
+	        	volumeUp++;	
+	        	
+	        	if(volumeLevel < -6.0 && volumeUp == 1 && !isMuted)
+	        		volumeLevel += 5.0;
+	        } else
+	        	volumeUp = 0;
+	        
+	        // Subtract volume
+	        if (window.kbState[KeyEvent.VK_2]) {
+	        	volumeDown++;
+	        	
+	        	if(volumeLevel > -74.0 && volumeDown == 1 && !isMuted)
+	        		volumeLevel -= 5.0;
+	        } else
+	        	volumeDown = 0;
+	        
+	        // Mute volume
+	        if (window.kbState[KeyEvent.VK_3]) {
+	        	noVolume++;
+	        	
+	        	if(noVolume == 1)
+	        		if(!isMuted) {
+	        			isMuted = true;
+	        			lastVolume = volumeLevel;
+	        			volumeLevel = gainControl.getMinimum();
+	        		}
+	        		else {
+	        			isMuted = false;
+	        			volumeLevel = lastVolume;
+	        		}  	
+	        } else
+	        	noVolume = 0;
+	        
+	        // Set volume
+	        gainControl = (FloatControl) music.getControl(FloatControl.Type.MASTER_GAIN);
+	        gainControl.setValue(volumeLevel);
+	        
             nextBlock++;
             gameTimer = nextBlock;
                         
