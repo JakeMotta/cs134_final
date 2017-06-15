@@ -373,7 +373,6 @@ public class Main {
             		spawnRate -= level*2;
             }   
         }  
-        
     }
     
     public static void drawText(GL2 gl, String text, int x, int y, Camera cam, int[] textSize, boolean newSize){
@@ -393,16 +392,15 @@ public class Main {
     }
     
     public static void explosion(int bA, GL2 gl) {
-    	System.out.println("Red block destroyed!");
-
 		boomDummy.setX(blockArray.get(bA).getX()-8);
 		boomDummy.setY(blockArray.get(bA).getY()+8);
 		
-		for(int i = 0; i < blockArray.size(); i++) {
-	    	if(Dummy_Collision(boomDummy, blockArray.get(i))) {
-	    		System.out.println("Hit: " + blockArray.get(i));
+		for(int i = 0; i < blockArray.size(); i++)
+	    	if(Dummy_Collision(boomDummy, blockArray.get(i)))
 	    		blockArray.get(i).setAlive(false);
-	    	}
+		
+		if(Dummy_Collision(boomDummy, hero)) {
+    		hero.damage(20);
     	}
 		
 		blockArray.remove(bA);

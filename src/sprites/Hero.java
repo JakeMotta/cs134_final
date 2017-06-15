@@ -136,40 +136,37 @@ public class Hero extends Sprite implements Actor {
 	public void update(GL2 gl) {
 		
 		if(hp <= 0) {
-			isAlive = false;
-		}
-
-		//dummy.update(gl);
-		//myDummy.update(gl);
+			death();
+		} else {
+			checkVSP();
+			checkMining();
+			checkInventory();
+			checkPlayerSpeech(gl);
+			checkLava();
+			
+			blockHit();
 		
-		checkVSP();
-		checkMining();
-		checkInventory();
-		checkPlayerSpeech(gl);
-		checkLava();
-		
-		blockHit();
-	
-		if(isGrounded == false)
-			gravity();		
-		else {
-			gravityInc = 20;
-			gravityTimer = 0;
-		}
-		
-		if (shouldMove) {
+			if(isGrounded == false)
+				gravity();		
+			else {
+				gravityInc = 20;
+				gravityTimer = 0;
+			}
 			
-			if(direction == "left")
-				currentImage = walkLeft;
-			
-			if(direction == "right")
-				currentImage = walkRight;
-			
-			if(direction == "up")
-				currentImage = walkUp;
-			
-			if(direction == "down")
-				currentImage = walkDown;
+			if (shouldMove) {
+				
+				if(direction == "left")
+					currentImage = walkLeft;
+				
+				if(direction == "right")
+					currentImage = walkRight;
+				
+				if(direction == "up")
+					currentImage = walkUp;
+				
+				if(direction == "down")
+					currentImage = walkDown;
+			}
 		}
 	    
 	    // Reset booleans
@@ -182,11 +179,16 @@ public class Hero extends Sprite implements Actor {
 	    draw(gl);
 	}
 	
+	public void death() {
+		// Trigger gameover screen
+		isAlive = false;
+	}
+	
 	public int getGoal() {
 		return goal;
 	}
 
-	public void setHP(int dmg) {
+	public void damage(int dmg) {
 		hp -= dmg;
 	}
 	
@@ -207,17 +209,8 @@ public class Hero extends Sprite implements Actor {
 	public void checkLava() {
 		if(getY() > Main.lava.getY()-10) {
 			currentImage = deathImg;
-			lavaHit();
+			moveY(-128);
 			hp -= 20;
-		}
-	}
-	
-	public void lavaHit() {
-		for(int i = 0; i < 60; i++) {
-			if(i % 20 == 0) {
-				shouldMove = false;
-				moveY(-64);
-			}
 		}
 	}
 	
@@ -300,11 +293,6 @@ public class Hero extends Sprite implements Actor {
 	
 	public void checkVSP() {
 		vsp = Main.getBlockVSP();
-	}
-	
-	public void sink() {
-		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 
-			moveY(vsp);	
 	}
 	
 	public void checkCollision() {			

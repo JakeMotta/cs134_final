@@ -289,12 +289,7 @@ public class Slime extends Sprite {
 	public void checkVSP() {
 		vsp = Main.getBlockVSP();
 	}
-	
-	public void sink() {
-		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 
-			moveY(vsp);	
-	}
-	
+
 	public void fall() {
 		moveY(vsp);
 	}

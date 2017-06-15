@@ -58,11 +58,9 @@ public class Block extends Sprite {
 		
 		switch(type) {
 			case 0: // Regular block
-				//floorDummy.update(gl);
 				setImage(Main.images.getBlockImage(hp));
 				break;
 			case 1: // Dark block
-				//floorDummy.update(gl);
 				setImage(Main.images.getDarkBlockImage(hp));
 				break;
 			case 2: // Red block1
@@ -98,11 +96,6 @@ public class Block extends Sprite {
 
 	public void checkVSP() {
 		vsp = Main.getBlockVSP();
-	}
-	
-	public void sink() {
-		if(Main.getGameTimer() % Main.getGameSpeed() == 0) 
-			moveY(vsp);	
 	}
 	
 	public void fall() {
@@ -149,10 +142,6 @@ public class Block extends Sprite {
 	
 	public boolean checkRemoval() {
 		return remove;
-	}
-	
-	public void setHP(int dmg) {
-		hp -= dmg;
 	}
 	
 	public int getHP() {
