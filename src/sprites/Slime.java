@@ -57,8 +57,8 @@ public class Slime extends Sprite {
 		
 		if(!deathAnimation) { // If not playing death animation
 			
-			floorDummy.update(gl);
-			myDummy.update(gl);
+			//floorDummy.update(gl);
+			//myDummy.update(gl);
 			
 			checkCenter();
 			checkCollision();
@@ -70,7 +70,7 @@ public class Slime extends Sprite {
 				onGroundTimer++;
 				
 				checkHero();
-				System.out.println("heroFound: " + heroFound);
+
 				if(heroFound) {
 					
 				} else {

@@ -52,6 +52,7 @@ public class Sprite {
 	public void moveY(long l) { y += l; }
 	
 	public boolean isAlive() { return isAlive; } 
+	public void setAlive(boolean life) { isAlive = life; } 
 	
 	public String getDirection() { return direction; }
 	

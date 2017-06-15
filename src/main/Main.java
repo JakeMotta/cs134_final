@@ -42,6 +42,7 @@ public class Main {
     public static Block block;
     public static Item item;
     public static Slime slime;
+    public static Dummy boomDummy;
     public static ClipPlayer clippy = new ClipPlayer();
     
     public static int worldWidth;
@@ -81,6 +82,9 @@ public class Main {
         hero = new Hero(512, (worldHeight-256)+blockVSP, spriteSize, gl);
         lava = new Lava(spriteSize, gl, worldHeight-160);
         font = new Font(spriteSize, gl);
+        boomDummy = new Dummy(0,0, spriteSize, gl);
+        boomDummy.setWidth(80);
+        boomDummy.setHeight(80);
         
         slimeArray.add(slime = new Slime(320, (worldHeight-512), spriteSize, gl));
         
@@ -144,10 +148,10 @@ public class Main {
             		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
             			e.printStackTrace();
             		}
-                    
-                    music.start();
+
+                    music.loop(Clip.LOOP_CONTINUOUSLY);
             	}
-            	
+            	            	
 	            camera.update(hero);
 	            background.update(gl);
 	            
@@ -207,7 +211,7 @@ public class Main {
 	        	    		dropItem(bA, gl);
 	        	    	else
 	        	    		explosion(bA, gl);
-	        	    	
+
 	        		    clippy.playClip(blockBreak);
 	        	    }
 	            }
@@ -367,8 +371,6 @@ public class Main {
             	
             	if(spawnRate > 50)
             		spawnRate -= level*2;
-            	
-            	System.out.println("Spawn: " + spawnRate);
             }   
         }  
         
@@ -391,10 +393,21 @@ public class Main {
     }
     
     public static void explosion(int bA, GL2 gl) {
-    	 if(blockArray.get(bA).getType() == 2) // Red block
-		    	blockArray.get(bA).explode(bA, gl);
+    	System.out.println("Red block destroyed!");
+
+		boomDummy.setX(blockArray.get(bA).getX()-8);
+		boomDummy.setY(blockArray.get(bA).getY()+8);
+		
+		for(int i = 0; i < blockArray.size(); i++) {
+	    	if(Dummy_Collision(boomDummy, blockArray.get(i))) {
+	    		System.out.println("Hit: " + blockArray.get(i));
+	    		blockArray.get(i).setAlive(false);
+	    	}
+    	}
+		
+		blockArray.remove(bA);
     }
-    
+
     public static void dropItem(int bA, GL2 gl) {
     	if(blockArray.get(bA).getID() % 7 == 0) { // Add random item drop
 	    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 0, blockArray.get(bA).getID(), gl);
