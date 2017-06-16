@@ -204,10 +204,21 @@ public class Hero extends Sprite implements Actor {
 	}
 	
 	public void checkLava() {
+		int x = 0;
+		
 		if(getY() > Main.lava.getY()-10) {
 			currentImage = deathImg;
 			moveY(-128);
 			hp -= 20;
+			x = Main.getRandom(4);
+			
+			switch(x) {
+				case 0: Main.clippy.playClip(Main.hit1); break;
+				case 1: Main.clippy.playClip(Main.hit2); break;
+				case 2: Main.clippy.playClip(Main.hit3); break;
+				case 3: Main.clippy.playClip(Main.hit4); break;
+				default: Main.clippy.playClip(Main.hit1); break;
+			}
 		}
 	}
 	
@@ -490,6 +501,7 @@ public class Hero extends Sprite implements Actor {
 					Main.blockArray.add(block);
 					inventory[i] = -1;
 					inventorySpace++;
+					Main.clippy.playClip(Main.blockThrow);
 				}
 				
 				if(direction == "right" && checkRight() && getX() < Main.worldWidth-getWidth()) {
@@ -501,6 +513,7 @@ public class Hero extends Sprite implements Actor {
 					Main.blockArray.add(block);
 					inventory[i] = -1;
 					inventorySpace++;
+					Main.clippy.playClip(Main.blockThrow);
 				}
 				
 				if(direction == "down" && checkBelow()) {
@@ -512,6 +525,7 @@ public class Hero extends Sprite implements Actor {
 					Main.blockArray.add(block);
 					inventory[i] = -1;
 					inventorySpace++;
+					Main.clippy.playClip(Main.blockThrow);
 				}
 			}
 		}
