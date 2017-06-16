@@ -81,9 +81,6 @@ public class Item extends Sprite {
 	public void checkCollected() {
 		if(Main.Dummy_Collision(Main.hero.myDummy, this)) {
 			isCollected = true;
-			
-			if(type == 0)
-				Main.clippy.playClip(Main.eatSound);
 		} 
 	}
 

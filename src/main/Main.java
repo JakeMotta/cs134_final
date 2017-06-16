@@ -61,23 +61,6 @@ public class Main {
     public static int playerScoreLast = 0;
     public static int level = 1;
     
-    public static float volumeLevel = 0, lastVolume = 0;
-    public static FloatControl gainControl; 
-    
-    // Sounds
-    public static Clip blockBreak = null;
-    public static Clip music = null;
-    public static Clip startMusic = null;
-    public static Clip explosionSound = null;
-    public static Clip fireballSound = null;
-    public static Clip blockThrow = null;
-    public static Clip hit1 = null;
-    public static Clip hit2 = null;
-    public static Clip hit3 = null;
-    public static Clip hit4 = null;
-    public static Clip eatSound = null;
-    
-    
     public static void main(String[] args) {
           
 		// Game initialization goes here.
@@ -104,27 +87,27 @@ public class Main {
         
         slimeArray.add(slime = new Slime(320, (worldHeight-512), spriteSize, gl));
         
+        
         pressedRight = pressedLeft = pressedUp = pressedSpace = volumeUp = volumeDown = noVolume = 0;
         lastFrameNS = curFrameNS; 
         curFrameNS = System.nanoTime();
         long deltaTimeMS = (curFrameNS - lastFrameNS) / 1000000;
         
+        // Sounds
+        Clip blockBreak = null;
+        Clip music = null;
+        
         try {
 			blockBreak = clippy.loadClip("sounds/pop.wav");
 			music = clippy.loadClip("sounds/main_music.wav");
-			startMusic = clippy.loadClip("sounds/startMusic.wav");
-			explosionSound = clippy.loadClip("sounds/explosion.wav");
-			fireballSound = clippy.loadClip("sounds/fireball.wav");
-			blockThrow = clippy.loadClip("sounds/throw.wav");
-			hit1 = clippy.loadClip("sounds/hit1.wav");
-			hit2 = clippy.loadClip("sounds/hit2.wav");
-			hit3 = clippy.loadClip("sounds/hit3.wav");
-			hit4 = clippy.loadClip("sounds/hit4.wav");
-			eatSound = clippy.loadClip("sounds/eat.wav");
 		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
 			e.printStackTrace();
 		}
-
+        
+        float volumeLevel = 0, lastVolume = 0;
+        FloatControl gainControl = (FloatControl) music.getControl(FloatControl.Type.MASTER_GAIN);;
+        volumeLevel = gainControl.getValue()-15;
+        
         // Physics runs at 100fps, or 10ms / physics frame
         int physicsDeltaMs = 10;
         int lastPhysicsFrameMs = 0;
@@ -133,8 +116,6 @@ public class Main {
         int spawnRate = 100;
         int gameLoop = 0;
         
-        volumeLevel = -15.0f;
-        changeVolume(volumeLevel);
         
         while (!shouldExit) {
         	
@@ -169,7 +150,12 @@ public class Main {
                     	}
                     }
                     
-                    startMusic.stop();
+                    try { // Reset the music
+            			music = clippy.loadClip("sounds/main_music.wav");
+            		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            			e.printStackTrace();
+            		}
+                    
                     music.loop(Clip.LOOP_CONTINUOUSLY);
             	}
             	            	
@@ -229,10 +215,12 @@ public class Main {
 	        	    		blockArray.remove(bA);
 	        	    }
 	        	    else { // Block is dead (from player)
-	        	    	if(blockArray.get(bA).getType() != 2) 
-	        	    		dropItem(bA, gl);   	
+	        	    	if(blockArray.get(bA).getType() != 2)
+	        	    		dropItem(bA, gl);
 	        	    	else
 	        	    		explosion(bA, gl);
+
+	        		    clippy.playClip(blockBreak);
 	        	    }
 	            }
 	            
@@ -323,8 +311,8 @@ public class Main {
                 	mySize[1] = 76;
                 	
                 	drawText(gl, "PRESS ENTER TO RETRY", 200, camera.getY()+750, camera, mySize, false);
-                	startMusic.loop(Clip.LOOP_CONTINUOUSLY);
             	}
+            	
             }
             	         
             // // ---------------------- PHYSICS UPDATE -----------------------
@@ -405,10 +393,8 @@ public class Main {
 	        if (window.kbState[KeyEvent.VK_1]) {
 	        	volumeUp++;	
 	        	
-	        	if(volumeLevel < -6.0 && volumeUp == 1 && !isMuted) {
+	        	if(volumeLevel < -6.0 && volumeUp == 1 && !isMuted)
 	        		volumeLevel += 5.0;
-	        		changeVolume(volumeLevel);
-	        	}
 	        } else
 	        	volumeUp = 0;
 	        
@@ -416,10 +402,8 @@ public class Main {
 	        if (window.kbState[KeyEvent.VK_2]) {
 	        	volumeDown++;
 	        	
-	        	if(volumeLevel > -74.0 && volumeDown == 1 && !isMuted) {
+	        	if(volumeLevel > -74.0 && volumeDown == 1 && !isMuted)
 	        		volumeLevel -= 5.0;
-	        		changeVolume(volumeLevel);
-	        	}
 	        } else
 	        	volumeDown = 0;
 	        
@@ -432,15 +416,17 @@ public class Main {
 	        			isMuted = true;
 	        			lastVolume = volumeLevel;
 	        			volumeLevel = gainControl.getMinimum();
-	        			changeVolume(volumeLevel);
 	        		}
 	        		else {
 	        			isMuted = false;
 	        			volumeLevel = lastVolume;
-	        			changeVolume(volumeLevel);
 	        		}  	
 	        } else
 	        	noVolume = 0;
+	        
+	        // Set volume
+	        gainControl = (FloatControl) music.getControl(FloatControl.Type.MASTER_GAIN);
+	        gainControl.setValue(volumeLevel);
 	        
             nextBlock++;
             gameTimer = nextBlock;
@@ -465,32 +451,6 @@ public class Main {
             		spawnRate -= level*2;
             }   
         }  
-    }
-    
-    // Change volume levels
-    public static void changeVolume(float volume) { 	
-        gainControl = (FloatControl) blockBreak.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(volume);
-        gainControl = (FloatControl) music.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(volume);
-        gainControl = (FloatControl) startMusic.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(volume);
-        gainControl = (FloatControl) explosionSound.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(volume);
-        gainControl = (FloatControl) fireballSound.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(volume);
-        gainControl = (FloatControl) blockThrow.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(volume);
-        gainControl = (FloatControl) hit1.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(volume);
-        gainControl = (FloatControl) hit2.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(volume);
-        gainControl = (FloatControl) hit3.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(volume);
-        gainControl = (FloatControl) hit4.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(volume);
-        gainControl = (FloatControl) eatSound.getControl(FloatControl.Type.MASTER_GAIN);
-        gainControl.setValue(volume);
     }
     
     public static void drawText(GL2 gl, String text, int x, int y, Camera cam, int[] textSize, boolean newSize){
@@ -521,7 +481,6 @@ public class Main {
     		hero.damage(20);
     	}
 		
-		clippy.playClip(explosionSound);
 		blockArray.remove(bA);
     }
 
@@ -540,7 +499,6 @@ public class Main {
 		    }		   
 	    }
     	
-    	clippy.playClip(blockBreak);
     	blockArray.remove(bA);
     }
     
