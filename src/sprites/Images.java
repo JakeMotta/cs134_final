@@ -7,6 +7,9 @@ import main.Main;
 public class Images {
 	
 	protected int image;
+	
+	// Game splashscreen
+	public int splashScreen;
 
 	// Block images
 	private int blockImg;
@@ -103,6 +106,9 @@ public class Images {
     public int exclamation;
 	
 	public Images(int[] spriteSize, GL2 gl) {
+		
+		// Spashscreen
+		splashScreen = Main.glTexImageTGAFile(gl, "Sprites/Background/splashscreen.tga", spriteSize);
 		
 		// Block images
 		blockImg = Main.glTexImageTGAFile(gl, "Sprites/Blocks/block1.tga", spriteSize);

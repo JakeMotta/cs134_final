@@ -40,6 +40,7 @@ public class Main {
     public static Slime slime;
     public static Dummy boomDummy;
     public static ClipPlayer clippy = new ClipPlayer();
+    public static Splashscreen splashscreen;
     
     public static int worldWidth;
     public static int worldHeight;
@@ -71,6 +72,7 @@ public class Main {
         long lastFrameNS;
         long curFrameNS = System.nanoTime();
         
+        splashscreen = new Splashscreen(spriteSize, gl);
         images = new Images(spriteSize,gl);
         background = new Background(spriteSize, gl);
         worldWidth = background.getWorldWidth();
@@ -112,9 +114,12 @@ public class Main {
         int nextBlock = 0, randomBlockX = 0, randomBlockType = 0, temp = 0;
         int lavaTimer = 0;
         int spawnRate = 100;
+        int gameLoop = 0;
         
         
         while (!shouldExit) {
+        	
+        	System.out.println("Gameloop: " + gameLoop);
 
             System.arraycopy(window.kbState, 0, window.kbPrevState, 0, window.kbState.length);
 
@@ -150,7 +155,7 @@ public class Main {
             		} catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
             			e.printStackTrace();
             		}
-
+                    
                     music.loop(Clip.LOOP_CONTINUOUSLY);
             	}
             	            	
@@ -242,44 +247,72 @@ public class Main {
 	            	intToString = String.valueOf((camera.getY()/64) - ((worldHeight/64)-i-1));
 	            	drawText(gl, intToString, 575, (camera.getY()+67) + (i*64), camera, spriteSize, false);
 	            }
-            } else {
+            } else { 
 
-            	camera.setY(Main.worldHeight - 960);
-                lava.setY(worldHeight-160);
-                lavaVSP = 4;
-                spawnRate = 100;
-                level = 1;
-                background.reset();
+            	if(gameLoop >= 1) { // GAME OVER
+            		camera.setY(Main.worldHeight - 960);
+                    lava.setY(worldHeight-160);
+                    lavaVSP = 4;
+                    spawnRate = 100;
+                    level = 1;
+                    background.reset();
 
-            	music.stop();
-            	hero.reset();
-            	playerScore = 0;
-            	
-            	for(int i = 0; i < blockArray.size(); i++)
-            		blockArray.remove(i);
-            	
-            	for(int i = 0; i < itemArray.size(); i++)
-            		itemArray.remove(i);
-            	
-            	int[] mySize = new int[2];
-            	mySize[0] = 56;
-            	mySize[1] = 76;
-            	drawText(gl, "GAME OVER", 68, camera.getY()+300, camera, mySize, true);
-            	
-            	drawText(gl, "PRESS ENTER TO RETRY", 200, camera.getY()+400, camera, mySize, false);
-            	
-            	intToString = String.valueOf(playerScoreLast);
-            	mySize[0] = 28;
-            	mySize[1] = 38;
-            	
-            	if(playerScoreLast < 10)
-            		drawText(gl, "SCORE:" + intToString, 222, camera.getY()+500, camera, mySize, true);
-            	else if(playerScoreLast > 0 && playerScoreLast < 100)
-            		drawText(gl, "SCORE:" + intToString, 208, camera.getY()+500, camera, mySize, true);
-            	else
-            		drawText(gl, "SCORE:" + intToString, 194, camera.getY()+500, camera, mySize, true);
+                	music.stop();
+                	hero.reset();
+                	playerScore = 0;
+                	nextBlock = 0;  
+                	
+                	for(int i = 0; i < blockArray.size(); i++)
+                		blockArray.remove(i);
+                	
+                	for(int i = 0; i < itemArray.size(); i++)
+                		itemArray.remove(i);
+                	
+                	int[] mySize = new int[2];
+                	mySize[0] = 56;
+                	mySize[1] = 76;
+                	drawText(gl, "GAME OVER", 68, camera.getY()+300, camera, mySize, true);
+                	
+                	drawText(gl, "PRESS ENTER TO RETRY", 200, camera.getY()+400, camera, mySize, false);
+                	
+                	intToString = String.valueOf(playerScoreLast);
+                	mySize[0] = 28;
+                	mySize[1] = 38;
+                	
+                	if(playerScoreLast < 10)
+                		drawText(gl, "SCORE:" + intToString, 222, camera.getY()+500, camera, mySize, true);
+                	else if(playerScoreLast > 0 && playerScoreLast < 100)
+                		drawText(gl, "SCORE:" + intToString, 208, camera.getY()+500, camera, mySize, true);
+                	else
+                		drawText(gl, "SCORE:" + intToString, 194, camera.getY()+500, camera, mySize, true);     	
+            	} else { // GAME START
+            		splashscreen.update(gl);
+            		
+            		camera.setY(Main.worldHeight - 960);
+                    lava.setY(worldHeight-160);
+                    lavaVSP = 4;
+                    spawnRate = 100;
+                    level = 1;
+                    background.reset();
 
-            	nextBlock = 0;
+                	music.stop();
+                	hero.reset();
+                	playerScore = 0;
+                	nextBlock = 0;
+                	
+                	for(int i = 0; i < blockArray.size(); i++)
+                		blockArray.remove(i);
+                	
+                	for(int i = 0; i < itemArray.size(); i++)
+                		itemArray.remove(i);
+                	
+                	int[] mySize = new int[2];
+                	mySize[0] = 56;
+                	mySize[1] = 76;
+                	
+                	drawText(gl, "PRESS ENTER TO RETRY", 200, camera.getY()+750, camera, mySize, false);
+            	}
+            	
             }
             	         
             // // ---------------------- PHYSICS UPDATE -----------------------
@@ -349,6 +382,9 @@ public class Main {
 	        	hero.ctrlKeyDown(false);
 	        
 	        if (window.kbState[KeyEvent.VK_ENTER]) {
+	        	
+	        	gameLoop++;
+	        	
 	        	if(isGameOver)
 	        		isGameOver = false;
 	        }
