@@ -319,6 +319,8 @@ public class Hero extends Sprite implements Actor {
 		gravityTimer++;
 		
 		if(gravityTimer % gravityInc == 0) {
+			
+			shouldMove = false;
 			moveY(64);
 			gravityTimer = 0;
 			
