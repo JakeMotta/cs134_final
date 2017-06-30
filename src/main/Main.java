@@ -82,12 +82,11 @@ public class Main {
         lava = new Lava(spriteSize, gl, worldHeight-160);
         font = new Font(spriteSize, gl);
         boomDummy = new Dummy(0,0, spriteSize, gl);
-        boomDummy.setWidth(80);
-        boomDummy.setHeight(80);
+        boomDummy.setWidth(128);
+        boomDummy.setHeight(128);
         
-        slimeArray.add(slime = new Slime(320, (worldHeight-512), spriteSize, gl));
-        
-        
+        slimeArray.add(slime = new Slime(320, hero.getY()-500, spriteSize, gl));
+   
         pressedRight = pressedLeft = pressedUp = pressedSpace = volumeUp = volumeDown = noVolume = 0;
         lastFrameNS = curFrameNS; 
         curFrameNS = System.nanoTime();
@@ -115,13 +114,14 @@ public class Main {
         int lavaTimer = 0;
         int spawnRate = 100;
         int gameLoop = 0;
+        int flashTextTimer = 0;
         
         
         while (!shouldExit) {
         	
-        	System.out.println("Gameloop: " + gameLoop);
-
             System.arraycopy(window.kbState, 0, window.kbPrevState, 0, window.kbState.length);
+            
+            System.out.println(level);
 
             // Actually, this runs the entire OS message pump.
             window.myWindow.display();
@@ -174,9 +174,10 @@ public class Main {
 	            	// Add background alert
 	            	background.addAlert(randomBlockX/64);
 	            	            	
-	            	if(randomBlockType < 60) // Regular block
+	            	// Block drop logic
+	            	if(randomBlockType < 70) // Regular block
 	            		block = new Block(randomBlockX, camera.getY()-128, spriteSize, 0, blockID, gl);  
-	            	else if(randomBlockType >= 60 && randomBlockType < 90)  // Dark block
+	            	else if(randomBlockType >= 70 && randomBlockType < 95)  // Dark block
 	            		block = new Block(randomBlockX, camera.getY()-128, spriteSize, 1, blockID, gl); 
 	            	else // Red block
 	            		block = new Block(randomBlockX, camera.getY()-128, spriteSize, 2, blockID, gl); 
@@ -310,9 +311,14 @@ public class Main {
                 	mySize[0] = 56;
                 	mySize[1] = 76;
                 	
-                	drawText(gl, "PRESS ENTER TO RETRY", 200, camera.getY()+750, camera, mySize, false);
+                	flashTextTimer++;
+                	
+                	if(flashTextTimer < 50)
+                		drawText(gl, "PRESS ENTER TO START", 200, camera.getY()+750, camera, mySize, false);
+                	
+                	if(flashTextTimer > 99)
+                		flashTextTimer = 0;
             	}
-            	
             }
             	         
             // // ---------------------- PHYSICS UPDATE -----------------------
@@ -427,6 +433,8 @@ public class Main {
 	        // Set volume
 	        gainControl = (FloatControl) music.getControl(FloatControl.Type.MASTER_GAIN);
 	        gainControl.setValue(volumeLevel);
+	        gainControl = (FloatControl) blockBreak.getControl(FloatControl.Type.MASTER_GAIN);
+	        gainControl.setValue(volumeLevel);
 	        
             nextBlock++;
             gameTimer = nextBlock;
@@ -438,13 +446,16 @@ public class Main {
 	            else
 	            	lavaTimer = 0;      
             
+            // Update player highscore
             if(playerScore > playerScoreLast)
             	playerScoreLast = playerScore;
             
             playerScore = (-1) * ((hero.getY()/ 64) - 155);
             
-            if(gameTimer % 1000 == 0) {
-            	lavaVSP += 1;
+            // Update game speed
+            if(gameTimer % 1000 == 0) {       	
+            	if(level <= 8)
+            		lavaVSP += 1;
             	level += 1;
             	
             	if(spawnRate > 50)
@@ -470,8 +481,8 @@ public class Main {
     }
     
     public static void explosion(int bA, GL2 gl) {
-		boomDummy.setX(blockArray.get(bA).getX()-8);
-		boomDummy.setY(blockArray.get(bA).getY()+8);
+		boomDummy.setX(blockArray.get(bA).getX()-32);
+		boomDummy.setY(blockArray.get(bA).getY()-32);
 		
 		for(int i = 0; i < blockArray.size(); i++)
 	    	if(Dummy_Collision(boomDummy, blockArray.get(i)))
@@ -486,8 +497,15 @@ public class Main {
 
     public static void dropItem(int bA, GL2 gl) {
     	if(blockArray.get(bA).getID() % 7 == 0) { // Add random item drop
-	    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 0, blockArray.get(bA).getID(), gl);
-	    	itemArray.add(item);
+    		
+    		int myRand = getRandom(2);
+    		
+    		if(myRand == 0) { // drop an item
+    			item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 0, blockArray.get(bA).getID(), gl);
+    			itemArray.add(item);
+    		} else { // slime time
+    			slimeArray.add(slime = new Slime(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, gl));
+    		}
 	    } else {
 		    if(blockArray.get(bA).getType() == 0) { // Regular block
 		    	item = new Item(blockArray.get(bA).getX(), blockArray.get(bA).getY(), spriteSize, 1, blockArray.get(bA).getID(), gl);

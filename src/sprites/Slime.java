@@ -29,6 +29,13 @@ public class Slime extends Sprite {
 	public boolean deathAnimation = false;
 	public int deathCounter = 0;
 	
+	
+	public boolean freeze = false;
+	public int freezeTimer = 100;
+	public int freezeReset = 100;
+	public String tempDirection;
+	public int dirSwitch = 0;
+	
 	 public Dummy dummy; // Used for player collision and mining collision
 	 public Dummy floorDummy; // Used for floor detection
 	 public Dummy myDummy; // Used for knowing when a block is on-top of us
@@ -49,40 +56,58 @@ public class Slime extends Sprite {
 	public void update(GL2 gl) {
 		if(hp <= 0) 
 			isAlive = false;
-		
+			
+		// If slime isn't dead
 		if(!deathAnimation) { // If not playing death animation
 
 			checkCenter();
 			checkCollision();
 			checkLava();
-			
+
 			if(!isGrounded)
 				fall();
 			else {
 				onGroundTimer++;
 				
-				checkHero();
-
-				if(heroFound) {
+				// Slime should be frozen in place, allowing a quick chance for our hero to hit him
+				if(freeze) {
+					freezeTimer -= 1;
+					dirSwitch += 1;
 					
+					if(dirSwitch <= 1)
+						tempDirection = direction;
+					
+					// Have slime run like hell
+					if(freezeTimer <= 0) {
+						runlikemad();
+					} else {// Set proper sitting image
+						playMovement = false;
+						currentImage = Main.images.getSlimeWalk(direction, 0);
+					}
 				} else {
-					if(!shouldRoam)
-						roamWait();
-					else
-						roam();
-				}
+					checkHero();
 	
-				if(playMovement) { // Hero within target distance
-					// Play walking animation
-				    if (walkCounter >= (fps*Main.images.slimeRight.length)-2)
-				        walkCounter = -1;
-				    else
-				        walkCounter++;
-				
-				    if(walkCounter % fps == 0) {
-				    	currentImage = Main.images.getSlimeWalk(direction, walkCounter/fps);
-				    }
+					if(heroFound) {
+						
+					} else {
+						if(!shouldRoam)
+							roamWait();
+						else
+							roam();
+					}
 				}
+			}
+			
+			if(playMovement) { // Hero within target distance
+				// Play walking animation
+			    if (walkCounter >= (fps*Main.images.slimeRight.length)-2)
+			        walkCounter = -1;
+			    else
+			        walkCounter++;
+			
+			    if(walkCounter % fps == 0) {
+			    	currentImage = Main.images.getSlimeWalk(direction, walkCounter/fps);
+			    }
 			}
 		} else {
 			// Play walking animation
@@ -96,8 +121,32 @@ public class Slime extends Sprite {
 		    }
 		}
 		
+		//floorDummy.setImage(Main.images.dummyImg);
+		//floorDummy.update(gl);
+		
 		setImage(currentImage);
 		draw(gl);
+	}
+	
+	public void runlikemad() {
+		freezeReset -= 1;
+				
+		if(tempDirection == "left") {
+			direction = "right";
+			moveX(hsp);
+		} else {
+			direction = "left";
+			moveX(-hsp);
+		}
+		
+		playMovement = true;
+		
+		if(freezeReset <= 0) {
+			freeze = false;
+			freezeTimer = 100;
+			freezeReset = 100;
+			dirSwitch = 0;
+		}
 	}
 	
 	public void checkLava() {
@@ -144,6 +193,10 @@ public class Slime extends Sprite {
 		} else {
 			shouldRoam = false;
 		}
+		
+		if(heroFound && getX() < 5) {
+			freeze = true;
+		}
 	}
 	
 	public void moveRight() {
@@ -153,6 +206,10 @@ public class Slime extends Sprite {
 			playMovement = true;
 		} else {
 			shouldRoam = false;
+		}
+		
+		if(heroFound && getX() >= Main.worldWidth - width) {
+			freeze = true;
 		}
 	}
 	
@@ -171,9 +228,9 @@ public class Slime extends Sprite {
 				moveNone();
 			else {
 				if(Main.hero.getX() < getX()) // Hero left of slime
-					moveLeft();
-				else // Hero right of slime
 					moveRight();
+				else // Hero right of slime
+					moveLeft();
 			}
 		} else { // Hero not detected
 			heroFound = false;
@@ -194,10 +251,10 @@ public class Slime extends Sprite {
 	}
 	
 	public void checkCollision() {			
-		floorDummy.setWidth(58);
-		floorDummy.setHeight(60);
-		floorDummy.setX(getX()+4);
-		floorDummy.setY(getY()+4);
+		floorDummy.setWidth(32);
+		floorDummy.setHeight(32);
+		floorDummy.setX(getX()+16);
+		floorDummy.setY(getY()+32);
 		
 		for(int i = 0; i < Main.blockArray.size(); i++) {		
 			if(Main.Dummy_Collision(floorDummy, Main.blockArray.get(i))) {
