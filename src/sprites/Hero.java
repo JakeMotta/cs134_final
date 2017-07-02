@@ -19,7 +19,7 @@ public class Hero extends Sprite implements Actor {
 	
 	private static int deathImg;
 	
-	private int inventory[] = new int[] {-1, -1, -1};
+	private int inventory[];
 	private int size[];
 	private int defaultSize[];
 	
@@ -36,6 +36,7 @@ public class Hero extends Sprite implements Actor {
     private boolean isMining = false;
     private boolean ctrlDown = false;
     private boolean inventoryFull = false;
+    private boolean inventoryInc = false;
     
     // Counters
     private int mineCounter = 0;
@@ -43,6 +44,7 @@ public class Hero extends Sprite implements Actor {
     private int textTimer = 0;
     private int gravityInc = 20;
     private int inventorySpace = 3;
+    private int invTick = 0;
     private int hp = 100;
     private int blockHitTimer = 0;
     private int goal = 480;
@@ -77,6 +79,13 @@ public class Hero extends Sprite implements Actor {
 		// Death image
 		deathImg = Main.glTexImageTGAFile(gl, "Sprites/Hero/death.tga", spriteSize);
 		
+		inventory = new int[5];
+		
+		// Set all initial inventory to -1
+		for(int i = 0; i < inventory.length; i++) {
+			inventory[i] = -1;
+		}
+		
 	    vsp = Main.getBlockVSP();
 		direction = "down";
 	    width = 64;
@@ -84,7 +93,7 @@ public class Hero extends Sprite implements Actor {
 	    keyDown = null;
 	    isGrounded = false;
 	    size = defaultSize = spriteSize;
-	    	    
+   
 	    // Bunch of dummies
 	 	dummy = new Dummy(0,0,spriteSize,gl);
 	 	floorDummy = new Dummy(0,0,spriteSize,gl);
@@ -111,6 +120,7 @@ public class Hero extends Sprite implements Actor {
 	    inventorySpace = 3;
 	    hp = 100;
 	    blockHitTimer = 0;
+	    invTick = 0;
 	    
 	    isAlive = true;
 		vsp = Main.getBlockVSP();
@@ -140,6 +150,7 @@ public class Hero extends Sprite implements Actor {
 			checkInventory();
 			checkPlayerSpeech(gl);
 			checkLava();
+			checkLevel();
 			
 			blockHit();
 		
@@ -174,6 +185,14 @@ public class Hero extends Sprite implements Actor {
 	    setImage(currentImage);
 
 	    draw(gl);
+	}
+	
+	public void checkLevel() {
+		if(Main.level == 8 && invTick == 0) {
+			inventoryInc = true;
+			invTick++;
+			inventorySpace += 2; // I'm an idiot
+		}
 	}
 	
 	public void death() {
@@ -259,15 +278,21 @@ public class Hero extends Sprite implements Actor {
 	}
 	
 	public void checkInventory() {
-		for(int i = 0; i < inventory.length; i++) {
-			if(inventory[i] == -1) {
-				inventoryFull = false;
-				textTimer = 0;
-				break;
-			}
-			else
-				inventoryFull = true;
+		if(!inventoryInc) 
+			for(int i = 0; i < 3; i++) 
+				inventoryHelp(i);
+		else 
+			for(int i = 0; i < inventory.length; i++) 
+				inventoryHelp(i);
+	}
+	
+	public void inventoryHelp(int i) {
+		if(inventory[i] == -1) {
+			inventoryFull = false;
+			textTimer = 0;
 		}
+		else
+			inventoryFull = true;
 	}
 	
 	public boolean checkInventoryStatus() {

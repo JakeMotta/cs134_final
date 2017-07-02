@@ -156,7 +156,7 @@ public class Main {
             			e.printStackTrace();
             		}
                     
-                    music.loop(Clip.LOOP_CONTINUOUSLY);
+                    //music.loop(Clip.LOOP_CONTINUOUSLY);
             	}
             	            	
 	            camera.update(hero);
@@ -221,7 +221,7 @@ public class Main {
 	        	    	else
 	        	    		explosion(bA, gl);
 
-	        		    clippy.playClip(blockBreak);
+	        		    //clippy.playClip(blockBreak);
 	        	    }
 	            }
 	            
