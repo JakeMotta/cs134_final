@@ -239,7 +239,7 @@ public class Main {
 	            hero.update(gl);
 	            lava.update(gl, lavaTimer);
 
-	     	    intToString = String.valueOf(playerScoreLast);
+	     	    intToString = String.valueOf(playerScore);
 	            drawText(gl, "SCORE:" + intToString, 10, camera.getY()+25, camera, spriteSize, false);
 	            drawText(gl, "CAN CARRY:" + hero.getInventorySpace(), 10, camera.getY()+100, camera, spriteSize, false);
 	            drawText(gl, "HEALTH:" + hero.getHP(), 10, camera.getY()+75, camera, spriteSize, false);       
@@ -250,7 +250,7 @@ public class Main {
 	            }
             } else { 
 
-            	if(gameLoop >= 1) { // GAME OVER
+            	if(gameLoop >= 1) { // GAME OVER --------------------------------------------------------------------------------------
             		camera.setY(Main.worldHeight - 960);
                     lava.setY(worldHeight-160);
                     lavaVSP = 4;
@@ -286,7 +286,7 @@ public class Main {
                 		drawText(gl, "SCORE:" + intToString, 208, camera.getY()+500, camera, mySize, true);
                 	else
                 		drawText(gl, "SCORE:" + intToString, 194, camera.getY()+500, camera, mySize, true);     	
-            	} else { // GAME START
+            	} else { // GAME START --------------------------------------------------------------------------------------
             		splashscreen.update(gl);
             		
             		camera.setY(Main.worldHeight - 960);
