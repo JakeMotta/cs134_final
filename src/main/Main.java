@@ -121,8 +121,6 @@ public class Main {
         	
             System.arraycopy(window.kbState, 0, window.kbPrevState, 0, window.kbState.length);
             
-            System.out.println(level);
-
             // Actually, this runs the entire OS message pump.
             window.myWindow.display();
             if (!window.myWindow.isVisible()) {
@@ -239,11 +237,13 @@ public class Main {
 	            hero.update(gl);
 	            lava.update(gl, lavaTimer);
 
+	            // In-game text
 	     	    intToString = String.valueOf(playerScore);
 	            drawText(gl, "SCORE:" + intToString, 10, camera.getY()+25, camera, spriteSize, false);
 	            drawText(gl, "CAN CARRY:" + hero.getInventorySpace(), 10, camera.getY()+100, camera, spriteSize, false);
 	            drawText(gl, "HEALTH:" + hero.getHP(), 10, camera.getY()+75, camera, spriteSize, false);       
 
+	            // Display height levels
 	            for(int i = 0; i < 14; i++) {
 	            	intToString = String.valueOf((camera.getY()/64) - ((worldHeight/64)-i-1));
 	            	drawText(gl, intToString, 575, (camera.getY()+67) + (i*64), camera, spriteSize, false);

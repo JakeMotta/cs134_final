@@ -151,8 +151,12 @@ public class Hero extends Sprite implements Actor {
 			checkPlayerSpeech(gl);
 			checkLava();
 			checkLevel();
-			
 			blockHit();
+			
+			for(int i = 0; i < inventory.length; i++) {
+				System.out.println(inventory[i]);
+			}
+			System.out.println(inventoryFull);
 		
 			if(isGrounded == false)
 				gravity();		
@@ -278,21 +282,30 @@ public class Hero extends Sprite implements Actor {
 	}
 	
 	public void checkInventory() {
-		if(!inventoryInc) 
-			for(int i = 0; i < 3; i++) 
-				inventoryHelp(i);
-		else 
-			for(int i = 0; i < inventory.length; i++) 
-				inventoryHelp(i);
+		inventoryFull = inventoryHelp();
 	}
 	
-	public void inventoryHelp(int i) {
-		if(inventory[i] == -1) {
-			inventoryFull = false;
-			textTimer = 0;
+	public boolean inventoryHelp() {
+		boolean flag = true;
+		
+		if(!inventoryInc) 
+			for(int i = 0; i < 3; i++) {
+				if(inventory[i] == -1) {
+					flag = false;
+					textTimer = 0;
+					break;
+				}
+			}
+		else  {
+			for(int j = 0; j < inventory.length; j++) {
+				if(inventory[j] == -1) {
+					flag = false;
+					break;
+				}
+			}
 		}
-		else
-			inventoryFull = true;
+		
+		return flag;
 	}
 	
 	public boolean checkInventoryStatus() {
